@@ -376,6 +376,8 @@ export class ShopifyClient {
    */
   async validateConnection(): Promise<boolean> {
     try {
+      this.validateCredentials();
+
       const restUrl = `${this.baseUrl.replace("/graphql.json", "")}/shop.json`;
 
       const response = await fetch(restUrl, {
