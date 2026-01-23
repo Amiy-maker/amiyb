@@ -243,11 +243,19 @@ export class ShopifyClient {
 
       // Add file
       const uint8Array = new Uint8Array(fileBuffer);
+      const headers: Record<string, string> = {};
+
+      // Include Content-Length for AWS S3 targets
+      if (uploadUrl.includes('amazonaws.com')) {
+        headers['Content-Length'] = String(fileBuffer.length + 5000);
+      }
+
       formData.append("file", new Blob([uint8Array], { type: mimeType }), filename);
 
       const uploadResponse = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
+        headers,
       });
 
       if (!uploadResponse.ok) {
@@ -258,29 +266,27 @@ export class ShopifyClient {
 
       // Step 3: Create the file in Shopify's file storage using fileCreate mutation
       const fileCreateQuery = `
-        mutation CreateFile($input: FileInput!) {
-          fileCreate(input: $input) {
+        mutation fileCreate($files: [FileCreateInput!]!) {
+          fileCreate(files: $files) {
             files {
               id
-              originalSource {
-                url
-              }
+              fileStatus
               alt
-              createdAt
+              preview { image { url } status }
             }
-            userErrors {
-              field
-              message
-            }
+            userErrors { message }
           }
         }
       `;
 
       const fileCreateVariables = {
-        input: {
-          originalSource: resourceUrl,
-          alt: altText || filename,
-        },
+        files: [
+          {
+            alt: altText || filename,
+            contentType: "IMAGE",
+            originalSource: resourceUrl,
+          },
+        ],
       };
 
       console.log("Creating file record in Shopify for:", resourceUrl);
@@ -290,32 +296,70 @@ export class ShopifyClient {
 
       if (fileCreateResponse.errors) {
         console.error("FileCreate errors:", fileCreateResponse.errors);
-        // Don't throw - try fallback method
-      } else if (fileCreateResponse.data?.fileCreate?.files?.length > 0) {
-        const createdFile = fileCreateResponse.data.fileCreate.files[0];
-        const permanentUrl = createdFile.originalSource?.url;
+        throw new Error(
+          `FileCreate failed: ${fileCreateResponse.errors.map((e: any) => e.message).join('; ')}`
+        );
+      }
 
-        if (permanentUrl) {
-          const finalUrl = permanentUrl.startsWith("http") ? permanentUrl : `https:${permanentUrl}`;
-          console.log("Successfully created file. Permanent URL:", finalUrl);
-          return finalUrl;
+      const fileData = fileCreateResponse.data?.fileCreate;
+      if (!fileData?.files?.length) {
+        throw new Error("FileCreate returned no files");
+      }
+
+      const createdFile = fileData.files[0];
+      let imageUrl = createdFile.preview?.image?.url || null;
+
+      // If file is not fully processed, poll for the image URL
+      if (!imageUrl && createdFile.fileStatus === 'UPLOADED') {
+        const fileId = createdFile.id;
+        console.log("File uploaded but not yet processed, polling for image URL. File ID:", fileId);
+
+        for (let i = 0; i < 5; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          const pollQuery = `
+            query getFile($id: ID!) {
+              node(id: $id) {
+                ... on MediaImage {
+                  fileStatus
+                  preview { image { url } status }
+                }
+                ... on GenericFile {
+                  fileStatus
+                  preview { image { url } status }
+                }
+              }
+            }
+          `;
+
+          const pollResponse = await this.graphql(pollQuery, { id: fileId });
+          const node = pollResponse.data?.node;
+
+          if (!node) break;
+
+          const status = node.fileStatus || node.preview?.status;
+          const url = node.preview?.image?.url;
+
+          if (url) {
+            imageUrl = url;
+            console.log("Poll successful, obtained image URL:", imageUrl);
+            break;
+          }
+
+          if (status === 'READY') break;
+
+          console.log(`Poll attempt ${i + 1}: File status is ${status}, waiting...`);
         }
       }
 
-      // Fallback: Extract shop ID and construct URL
-      console.warn("FileCreate did not return URL, constructing CDN URL manually");
-      const stagingPathMatch = resourceUrl.match(/\/tmp\/(\d+)\//);
-      if (stagingPathMatch) {
-        const shopId = stagingPathMatch[1];
-        const urlParts = resourceUrl.split("/");
-        const stagedFilename = urlParts[urlParts.length - 1];
-
-        const permanentUrl = `https://cdn.shopify.com/s/files/1/${shopId}/files/${stagedFilename}`;
-        console.log("Fallback: Constructed permanent CDN URL:", permanentUrl);
-        return permanentUrl;
+      if (!imageUrl) {
+        // Fallback to resourceUrl if processing is delayed
+        console.warn("Image URL not obtained from preview, using resourceUrl as fallback");
+        imageUrl = resourceUrl;
       }
 
-      throw new Error("Could not determine file URL");
+      console.log("Successfully uploaded image. Final URL:", imageUrl);
+      return imageUrl;
     } catch (error) {
       throw new Error(
         `Image upload failed: ${error instanceof Error ? error.message : "Unknown error"}`
