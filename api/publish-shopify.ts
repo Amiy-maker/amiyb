@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { parseDocument } from './lib/document-parser';
-import { generateHTML } from './lib/html-generator';
-import { getShopifyClient } from './lib/shopify-client';
+import { parseDocument } from './lib/document-parser.js';
+import { generateHTML } from './lib/html-generator.js';
+import { getShopifyClient } from './lib/shopify-client.js';
 
 export interface PublishShopifyRequest {
   document: string;

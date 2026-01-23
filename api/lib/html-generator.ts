@@ -9,8 +9,8 @@
  * - Semantic structure (H2 for subheadings, etc.)
  */
 
-import { ParsedDocument, ParsedSection } from "./document-parser";
-import { SECTION_RULES } from "../../shared/section-rules";
+import { ParsedDocument, ParsedSection } from "./document-parser.js";
+import { SECTION_RULES } from "../../shared/section-rules.js";
 
 export interface HTMLGeneratorOptions {
   includeSchema?: boolean;
