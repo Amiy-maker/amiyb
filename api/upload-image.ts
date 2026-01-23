@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import busboy from 'busboy';
-import { getShopifyClient } from '../server/services/shopify-client';
+import { getShopifyClient } from './lib/shopify-client';
 
 export interface UploadImageResponse {
   success: boolean;
