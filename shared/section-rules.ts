@@ -95,7 +95,6 @@ export const SECTION_RULES: Record<string, SectionRule> = {
     wrapper: "article",
     image: {
       position: "after",
-      class: "inline-image w-full rounded-lg my-4",
       alt: "Supporting image",
       required: false,
     },
