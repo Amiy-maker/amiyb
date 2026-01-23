@@ -85,7 +85,7 @@ function generateSectionHTML(
       return generateHero(rawContent, rule, includeImages, section, imageUrls);
 
     case "section2":
-      return `<p class="text-lg leading-relaxed">${escapeHTML(rawContent)}</p>`;
+      return `<p>${escapeHTML(rawContent)}</p>`;
 
     case "section3":
       return generateList(lines, "ul", "Table of Contents");
@@ -97,13 +97,13 @@ function generateSectionHTML(
       return generateSectionBody(rawContent, includeImages, section, imageUrls);
 
     case "section6":
-      return `<blockquote class="border-l-4 border-blue-500 pl-4 italic text-gray-700">${escapeHTML(rawContent)}</blockquote>`;
+      return `<blockquote>${escapeHTML(rawContent)}</blockquote>`;
 
     case "section7":
       return generateComparisonTable(lines);
 
     case "section8":
-      return `<blockquote class="border-l-4 border-green-500 pl-4 italic">${escapeHTML(rawContent)}</blockquote>`;
+      return `<blockquote>${escapeHTML(rawContent)}</blockquote>`;
 
     case "section9":
       return generateList(lines, "ol", "Steps");
@@ -115,7 +115,7 @@ function generateSectionHTML(
       return generateFAQSection(lines);
 
     case "section12":
-      return `<p class="text-lg font-semibold text-center mt-8">${escapeHTML(rawContent)}</p>`;
+      return `<p>${escapeHTML(rawContent)}</p>`;
 
     default:
       console.warn(`Unknown section ID: ${id}. Valid sections are section1-section12.`);
@@ -133,7 +133,7 @@ function generateHero(
   section: ParsedSection,
   imageUrls: Record<string, string>
 ): string {
-  const h1 = `<h1 class="text-4xl font-bold mb-4">${escapeHTML(content)}</h1>`;
+  const h1 = `<h1>${escapeHTML(content)}</h1>`;
 
   if (includeImages && rule.image?.position === "after" && section.images && section.images.length > 0) {
     const image = section.images[0];
@@ -141,7 +141,7 @@ function generateHero(
     console.log(`Available imageUrls keys: ${Object.keys(imageUrls).join(", ")}`);
     const imageUrl = imageUrls[image.keyword] || "/placeholder-featured.jpg";
     console.log(`Resolved image URL: ${imageUrl}`);
-    const imgTag = `<img src="${imageUrl}" alt="${image.keyword}" class="${rule.image.class || ""}" />`;
+    const imgTag = `<img src="${imageUrl}" alt="${image.keyword}" />`;
     return `${h1}\n${imgTag}`;
   }
 
@@ -159,10 +159,10 @@ function generateList(
   const tag = listType === "ul" ? "ul" : "ol";
   const items = lines.map((line) => `<li>${escapeHTML(line)}</li>`).join("\n");
 
-  let html = `<${tag} class="space-y-2">\n${items}\n</${tag}>`;
+  let html = `<${tag}>\n${items}\n</${tag}>`;
 
   if (title) {
-    html = `<h2 class="text-2xl font-bold mb-4">${title}</h2>\n${html}`;
+    html = `<h2>${title}</h2>\n${html}`;
   }
 
   return html;
@@ -193,14 +193,14 @@ function generateSectionBody(
         lines[0].length < 60 &&
         (lines[0].endsWith(":") || lines[0] === lines[0].toUpperCase())
       ) {
-        result += `<h2 class="text-2xl font-bold mt-6 mb-4">${escapeHTML(lines[0])}</h2>\n`;
+        result += `<h2>${escapeHTML(lines[0])}</h2>\n`;
         lines.shift();
       }
 
       // Rest of content
       const bodyText = lines.join("\n").trim();
       if (bodyText) {
-        result += `<p class="text-base leading-relaxed">${escapeHTML(bodyText)}</p>`;
+        result += `<p>${escapeHTML(bodyText)}</p>`;
       }
 
       // Add image if enabled and available
@@ -209,7 +209,7 @@ function generateSectionBody(
         console.log(`Looking for image keyword: "${image.keyword}" in section`);
         const imageUrl = imageUrls[image.keyword] || "/placeholder-section.jpg";
         console.log(`Resolved image URL for section: ${imageUrl}`);
-        result += `\n<img src="${imageUrl}" alt="${image.keyword}" class="rounded-lg my-4" />`;
+        result += `\n<img src="${imageUrl}" alt="${image.keyword}" />`;
         imageIndex++;
       }
 
@@ -232,12 +232,12 @@ function generateComparisonTable(lines: string[]): string {
   const headers = lines[0].split("|").map((h) => h.trim());
   const rows = lines.slice(1).map((line) => line.split("|").map((cell) => cell.trim()));
 
-  let html = '<table class="w-full border-collapse border border-gray-300">\n';
+  let html = '<table>\n';
 
   // Header row
   html += "<thead><tr>";
   for (const header of headers) {
-    html += `<th class="border border-gray-300 p-3 bg-gray-100 font-bold">${escapeHTML(header)}</th>`;
+    html += `<th>${escapeHTML(header)}</th>`;
   }
   html += "</tr></thead>\n";
 
@@ -246,7 +246,7 @@ function generateComparisonTable(lines: string[]): string {
   for (const row of rows) {
     html += "<tr>";
     for (const cell of row) {
-      html += `<td class="border border-gray-300 p-3">${escapeHTML(cell)}</td>`;
+      html += `<td>${escapeHTML(cell)}</td>`;
     }
     html += "</tr>";
   }
@@ -288,14 +288,14 @@ function generateFAQSection(lines: string[]): string {
     return "<p>No FAQs provided</p>";
   }
 
-  let html = '<h2 class="text-2xl font-bold mb-6">Frequently Asked Questions</h2>\n';
-  html += '<div class="space-y-4">\n';
+  let html = '<h2>Frequently Asked Questions</h2>\n';
+  html += '<div>\n';
 
   for (const faq of faqs) {
     html += `
-<details class="border border-gray-300 rounded-lg p-4">
-  <summary class="font-bold cursor-pointer">${escapeHTML(faq.question)}</summary>
-  <p class="mt-3 text-gray-700">${escapeHTML(faq.answer)}</p>
+<details>
+  <summary>${escapeHTML(faq.question)}</summary>
+  <p>${escapeHTML(faq.answer)}</p>
 </details>
 `;
   }
@@ -380,21 +380,216 @@ export function generateHTMLDocument(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHTML(options.blogTitle || "Blog Post")}</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background-color: #fff; }
-    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-    h1 { font-size: 2.5em; margin-bottom: 20px; }
-    h2 { font-size: 2em; margin-top: 30px; margin-bottom: 15px; }
-    p { margin-bottom: 15px; }
-    ul, ol { margin-left: 20px; margin-bottom: 15px; }
-    li { margin-bottom: 10px; }
-    blockquote { border-left: 4px solid #3b82f6; padding-left: 15px; margin: 20px 0; font-style: italic; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-    th { background-color: #f5f5f5; font-weight: bold; }
-    img { max-width: 100%; height: auto; margin: 20px 0; }
-    details { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 4px; }
-    summary { cursor: pointer; font-weight: bold; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      line-height: 1.7;
+      color: #2c3e50;
+      background-color: #fafafa;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 60px 40px;
+      background-color: #ffffff;
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin-bottom: 30px;
+      margin-top: 0;
+      line-height: 1.2;
+      color: #1a1a1a;
+      letter-spacing: -0.5px;
+    }
+
+    h2 {
+      font-size: 1.8em;
+      font-weight: 600;
+      margin-top: 50px;
+      margin-bottom: 25px;
+      line-height: 1.3;
+      color: #1a1a1a;
+      border-bottom: 3px solid #e8e8e8;
+      padding-bottom: 12px;
+    }
+
+    p {
+      font-size: 1.05em;
+      line-height: 1.8;
+      margin-bottom: 25px;
+      color: #3a3a3a;
+      text-align: justify;
+    }
+
+    /* Images */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 40px auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Lists */
+    ul, ol {
+      margin: 30px 0 30px 35px;
+      line-height: 1.9;
+    }
+
+    li {
+      margin-bottom: 15px;
+      font-size: 1.05em;
+      color: #3a3a3a;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 5px solid #d4a574;
+      padding: 25px 30px;
+      margin: 40px 0;
+      background-color: #fef9f5;
+      font-style: italic;
+      font-size: 1.15em;
+      color: #5a5a5a;
+      line-height: 1.8;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 40px 0;
+      font-size: 1em;
+      background-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #f5f5f5 0%, #ebebeb 100%);
+    }
+
+    th {
+      padding: 18px;
+      text-align: left;
+      font-weight: 600;
+      color: #1a1a1a;
+      border-bottom: 2px solid #d0d0d0;
+      font-size: 0.95em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 16px 18px;
+      border-bottom: 1px solid #e8e8e8;
+      color: #3a3a3a;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    /* Details/Accordion */
+    details {
+      margin: 25px 0;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      background-color: #fafafa;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    details:hover {
+      background-color: #f5f5f5;
+      border-color: #d0d0d0;
+    }
+
+    details[open] {
+      background-color: #f5f5f5;
+    }
+
+    summary {
+      font-weight: 600;
+      font-size: 1.1em;
+      color: #1a1a1a;
+      cursor: pointer;
+      outline: none;
+      user-select: none;
+      padding: 5px 0;
+    }
+
+    details p {
+      margin-top: 18px;
+      margin-bottom: 0;
+      font-size: 1em;
+      color: #3a3a3a;
+    }
+
+    /* Schema markup */
+    script[type="application/ld+json"] {
+      display: none;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 24px;
+      }
+
+      h1 {
+        font-size: 2em;
+        margin-bottom: 24px;
+      }
+
+      h2 {
+        font-size: 1.5em;
+        margin-top: 40px;
+        margin-bottom: 20px;
+      }
+
+      p {
+        font-size: 1em;
+        text-align: left;
+      }
+
+      ul, ol {
+        margin-left: 24px;
+      }
+
+      blockquote {
+        padding: 20px 24px;
+        font-size: 1.05em;
+      }
+
+      table {
+        font-size: 0.95em;
+      }
+
+      th, td {
+        padding: 12px;
+      }
+    }
   </style>
 </head>
 <body>
