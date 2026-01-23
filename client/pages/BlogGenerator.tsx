@@ -158,6 +158,18 @@ export default function BlogGenerator() {
   };
 
   /**
+   * Remove an uploaded image
+   */
+  const removeImage = (keyword: string) => {
+    setImageUrls((prev) => {
+      const updated = { ...prev };
+      delete updated[keyword];
+      return updated;
+    });
+    toast.success(`Image "${keyword}" removed`);
+  };
+
+  /**
    * Generate HTML from document
    */
   const generateBlogHTML = async () => {
