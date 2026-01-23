@@ -46,7 +46,6 @@ export const SECTION_RULES: Record<string, SectionRule> = {
     wrapper: "h1",
     image: {
       position: "after",
-      class: "featured-image w-full rounded-lg shadow-lg",
       alt: "Blog post featured image",
       required: false,
     },
