@@ -3,7 +3,7 @@
  * and extracts structured content for each section.
  */
 
-import { SECTION_RULES, SectionRule } from "../../shared/section-rules";
+import { SECTION_RULES, SectionRule } from "../../shared/section-rules.js";
 
 export interface ImageReference {
   keyword: string;
