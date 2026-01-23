@@ -109,6 +109,8 @@ export class ShopifyClient {
     articleId: string,
     article: Partial<ShopifyArticleInput>
   ): Promise<string> {
+    this.validateCredentials();
+
     const restUrl = `${this.baseUrl.replace("/graphql.json", "")}/blogs/${blogId}/articles/${articleId}.json`;
 
     const updateData: any = {};
@@ -160,7 +162,7 @@ export class ShopifyClient {
     }
 
     const data = await response.json() as { blogs: Array<{ id: string; title: string }> };
-
+    
     if (data.blogs.length === 0) {
       throw new Error("No blogs found in this Shopify store");
     }
@@ -175,6 +177,8 @@ export class ShopifyClient {
    */
   async uploadImage(fileBuffer: Buffer, filename: string, altText?: string): Promise<string> {
     try {
+      this.validateCredentials();
+
       // Determine MIME type from filename
       const mimeType = this.getMimeType(filename);
 

@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { parseDocument } from '../server/services/document-parser';
-import { generateHTML, generateHTMLDocument, type HTMLGeneratorOptions } from '../server/services/html-generator';
+import { parseDocument } from './lib/document-parser';
+import { generateHTML, generateHTMLDocument, type HTMLGeneratorOptions } from './lib/html-generator';
 
 export interface GenerateHTMLRequest {
   document: string;
