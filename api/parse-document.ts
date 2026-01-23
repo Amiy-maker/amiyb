@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { parseDocument } from '../server/services/document-parser';
+import { parseDocument } from './lib/document-parser';
 
 export interface ParseDocumentRequest {
   document: string;
