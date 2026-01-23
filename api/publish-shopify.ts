@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { parseDocument } from '../server/services/document-parser';
-import { generateHTML } from '../server/services/html-generator';
+import { parseDocument } from './lib/document-parser';
+import { generateHTML } from './lib/html-generator';
 import { getShopifyClient } from '../server/services/shopify-client';
 
 export interface PublishShopifyRequest {
