@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SECTION_RULES, getSectionsByOrder } from "@shared/section-rules";
 import { GenerateHTMLRequest, GenerateHTMLResponse } from "@shared/api";
 import { toast } from "sonner";
-import { Copy, Download, Zap, Upload, Edit2 } from "lucide-react";
+import { Copy, Download, Zap, Upload, Edit2, Trash2 } from "lucide-react";
 import * as mammoth from "mammoth";
 
 export default function BlogGenerator() {
@@ -155,6 +155,18 @@ export default function BlogGenerator() {
     if (imageFileInputsRef.current[keyword]) {
       imageFileInputsRef.current[keyword].value = "";
     }
+  };
+
+  /**
+   * Remove an uploaded image
+   */
+  const removeImage = (keyword: string) => {
+    setImageUrls((prev) => {
+      const updated = { ...prev };
+      delete updated[keyword];
+      return updated;
+    });
+    toast.success(`Image "${keyword}" removed`);
   };
 
   /**
@@ -541,17 +553,39 @@ export default function BlogGenerator() {
                           <p className="text-xs text-green-600 mt-1">✓ Uploaded</p>
                         )}
                       </div>
-                      {!imageUrls[image.keyword] && (
-                        <>
-                          <input
-                            ref={(el) => {
-                              if (el) imageFileInputsRef.current[image.keyword] = el;
-                            }}
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            onChange={(e) => handleImageFileSelect(e, image.keyword)}
-                            className="hidden"
-                          />
+                      <div className="flex gap-2">
+                        <input
+                          ref={(el) => {
+                            if (el) imageFileInputsRef.current[image.keyword] = el;
+                          }}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          onChange={(e) => handleImageFileSelect(e, image.keyword)}
+                          className="hidden"
+                        />
+                        {imageUrls[image.keyword] ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => imageFileInputsRef.current[image.keyword]?.click()}
+                              disabled={uploadingImages[image.keyword]}
+                              className="gap-2"
+                            >
+                              <Edit2 size={14} />
+                              {uploadingImages[image.keyword] ? "Uploading..." : "Change"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removeImage(image.keyword)}
+                              className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 size={14} />
+                              Remove
+                            </Button>
+                          </>
+                        ) : (
                           <Button
                             size="sm"
                             variant="outline"
@@ -562,8 +596,8 @@ export default function BlogGenerator() {
                             <Upload size={14} />
                             {uploadingImages[image.keyword] ? "Uploading..." : "Upload"}
                           </Button>
-                        </>
-                      )}
+                        )}
+                      </div>
                     </div>
                   ))}
                 </CardContent>
