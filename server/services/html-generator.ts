@@ -141,7 +141,7 @@ function generateHero(
     console.log(`Available imageUrls keys: ${Object.keys(imageUrls).join(", ")}`);
     const imageUrl = imageUrls[image.keyword] || "/placeholder-featured.jpg";
     console.log(`Resolved image URL: ${imageUrl}`);
-    const imgTag = `<img src="${imageUrl}" alt="${image.keyword}" class="${rule.image.class || ""}" />`;
+    const imgTag = `<img src="${imageUrl}" alt="${image.keyword}" />`;
     return `${h1}\n${imgTag}`;
   }
 
