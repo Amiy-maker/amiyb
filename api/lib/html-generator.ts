@@ -103,7 +103,7 @@ function generateSectionHTML(
       return generateComparisonTable(lines);
 
     case "section8":
-      return `<blockquote class="border-l-4 border-green-500 pl-4 italic">${escapeHTML(rawContent)}</blockquote>`;
+      return `<blockquote>${escapeHTML(rawContent)}</blockquote>`;
 
     case "section9":
       return generateList(lines, "ol", "Steps");
