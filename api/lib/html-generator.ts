@@ -97,7 +97,7 @@ function generateSectionHTML(
       return generateSectionBody(rawContent, includeImages, section, imageUrls);
 
     case "section6":
-      return `<blockquote class="border-l-4 border-blue-500 pl-4 italic text-gray-700">${escapeHTML(rawContent)}</blockquote>`;
+      return `<blockquote>${escapeHTML(rawContent)}</blockquote>`;
 
     case "section7":
       return generateComparisonTable(lines);
