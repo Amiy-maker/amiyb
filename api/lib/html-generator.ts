@@ -85,7 +85,7 @@ function generateSectionHTML(
       return generateHero(rawContent, rule, includeImages, section, imageUrls);
 
     case "section2":
-      return `<p class="text-lg leading-relaxed">${escapeHTML(rawContent)}</p>`;
+      return `<p>${escapeHTML(rawContent)}</p>`;
 
     case "section3":
       return generateList(lines, "ul", "Table of Contents");
