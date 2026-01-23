@@ -70,28 +70,7 @@ export class ShopifyClient {
    * Publish a blog article to Shopify
    */
   async publishArticle(blogId: string, article: ShopifyArticleInput): Promise<string> {
-    const mutation = `
-      mutation CreateArticle($input: ArticleInput!) {
-        articleCreate(blogId: $input.blogId, input: {
-          title: $input.title
-          bodyHtml: $input.bodyHtml
-          author: $input.author
-          publishedAt: $input.publishedAt
-          tags: $input.tags
-        }) {
-          article {
-            id
-            title
-            handle
-            url
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `;
+    this.validateCredentials();
 
     // Use REST API instead of GraphQL for simpler implementation
     const restUrl = `${this.baseUrl.replace("/graphql.json", "")}/blogs/${blogId}/articles.json`;
