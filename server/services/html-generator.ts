@@ -70,6 +70,16 @@ function generateSectionHTML(
 ): string {
   const { id, rawContent, rule, lines } = section;
 
+  // Verify section data
+  if (!id) {
+    console.warn("Section has no ID");
+    return "";
+  }
+  if (!rawContent && lines.length === 0) {
+    console.warn(`Section ${id} has no content`);
+    return "";
+  }
+
   switch (id) {
     case "section1":
       return generateHero(rawContent, rule, includeImages, section, imageUrls);
@@ -108,6 +118,7 @@ function generateSectionHTML(
       return `<p class="text-lg font-semibold text-center mt-8">${escapeHTML(rawContent)}</p>`;
 
     default:
+      console.warn(`Unknown section ID: ${id}. Valid sections are section1-section12.`);
       return "";
   }
 }
