@@ -380,9 +380,216 @@ export function generateHTMLDocument(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHTML(options.blogTitle || "Blog Post")}</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; }
-    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      line-height: 1.7;
+      color: #2c3e50;
+      background-color: #fafafa;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 60px 40px;
+      background-color: #ffffff;
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin-bottom: 30px;
+      margin-top: 0;
+      line-height: 1.2;
+      color: #1a1a1a;
+      letter-spacing: -0.5px;
+    }
+
+    h2 {
+      font-size: 1.8em;
+      font-weight: 600;
+      margin-top: 50px;
+      margin-bottom: 25px;
+      line-height: 1.3;
+      color: #1a1a1a;
+      border-bottom: 3px solid #e8e8e8;
+      padding-bottom: 12px;
+    }
+
+    p {
+      font-size: 1.05em;
+      line-height: 1.8;
+      margin-bottom: 25px;
+      color: #3a3a3a;
+      text-align: justify;
+    }
+
+    /* Images */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 40px auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Lists */
+    ul, ol {
+      margin: 30px 0 30px 35px;
+      line-height: 1.9;
+    }
+
+    li {
+      margin-bottom: 15px;
+      font-size: 1.05em;
+      color: #3a3a3a;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 5px solid #d4a574;
+      padding: 25px 30px;
+      margin: 40px 0;
+      background-color: #fef9f5;
+      font-style: italic;
+      font-size: 1.15em;
+      color: #5a5a5a;
+      line-height: 1.8;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 40px 0;
+      font-size: 1em;
+      background-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #f5f5f5 0%, #ebebeb 100%);
+    }
+
+    th {
+      padding: 18px;
+      text-align: left;
+      font-weight: 600;
+      color: #1a1a1a;
+      border-bottom: 2px solid #d0d0d0;
+      font-size: 0.95em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 16px 18px;
+      border-bottom: 1px solid #e8e8e8;
+      color: #3a3a3a;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    /* Details/Accordion */
+    details {
+      margin: 25px 0;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      background-color: #fafafa;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    details:hover {
+      background-color: #f5f5f5;
+      border-color: #d0d0d0;
+    }
+
+    details[open] {
+      background-color: #f5f5f5;
+    }
+
+    summary {
+      font-weight: 600;
+      font-size: 1.1em;
+      color: #1a1a1a;
+      cursor: pointer;
+      outline: none;
+      user-select: none;
+      padding: 5px 0;
+    }
+
+    details p {
+      margin-top: 18px;
+      margin-bottom: 0;
+      font-size: 1em;
+      color: #3a3a3a;
+    }
+
+    /* Schema markup */
+    script[type="application/ld+json"] {
+      display: none;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 24px;
+      }
+
+      h1 {
+        font-size: 2em;
+        margin-bottom: 24px;
+      }
+
+      h2 {
+        font-size: 1.5em;
+        margin-top: 40px;
+        margin-bottom: 20px;
+      }
+
+      p {
+        font-size: 1em;
+        text-align: left;
+      }
+
+      ul, ol {
+        margin-left: 24px;
+      }
+
+      blockquote {
+        padding: 20px 24px;
+        font-size: 1.05em;
+      }
+
+      table {
+        font-size: 0.95em;
+      }
+
+      th, td {
+        padding: 12px;
+      }
+    }
   </style>
 </head>
 <body>
