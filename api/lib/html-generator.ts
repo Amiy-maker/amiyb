@@ -232,12 +232,12 @@ function generateComparisonTable(lines: string[]): string {
   const headers = lines[0].split("|").map((h) => h.trim());
   const rows = lines.slice(1).map((line) => line.split("|").map((cell) => cell.trim()));
 
-  let html = '<table class="w-full border-collapse border border-gray-300">\n';
+  let html = '<table>\n';
 
   // Header row
   html += "<thead><tr>";
   for (const header of headers) {
-    html += `<th class="border border-gray-300 p-3 bg-gray-100 font-bold">${escapeHTML(header)}</th>`;
+    html += `<th>${escapeHTML(header)}</th>`;
   }
   html += "</tr></thead>\n";
 
@@ -246,7 +246,7 @@ function generateComparisonTable(lines: string[]): string {
   for (const row of rows) {
     html += "<tr>";
     for (const cell of row) {
-      html += `<td class="border border-gray-300 p-3">${escapeHTML(cell)}</td>`;
+      html += `<td>${escapeHTML(cell)}</td>`;
     }
     html += "</tr>";
   }
