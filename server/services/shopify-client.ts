@@ -409,6 +409,15 @@ let client: ShopifyClient | null = null;
 
 export function getShopifyClient(): ShopifyClient {
   if (!client) {
+    const shopName = process.env.SHOPIFY_SHOP;
+    const accessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+
+    if (!shopName || !accessToken) {
+      throw new Error(
+        "Shopify credentials not configured. Please set SHOPIFY_SHOP and SHOPIFY_ADMIN_ACCESS_TOKEN environment variables."
+      );
+    }
+
     client = new ShopifyClient();
   }
   return client;
