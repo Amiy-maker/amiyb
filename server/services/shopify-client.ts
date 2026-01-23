@@ -27,11 +27,6 @@ export class ShopifyClient {
     this.shopName = process.env.SHOPIFY_SHOP || "";
     this.accessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
     this.apiVersion = process.env.SHOPIFY_API_VERSION || "2025-01";
-
-    if (!this.shopName || !this.accessToken) {
-      throw new Error("Missing Shopify credentials in environment variables");
-    }
-
     this.baseUrl = `https://${this.shopName}/admin/api/${this.apiVersion}`;
   }
 
