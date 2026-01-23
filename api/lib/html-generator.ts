@@ -115,7 +115,7 @@ function generateSectionHTML(
       return generateFAQSection(lines);
 
     case "section12":
-      return `<p class="text-lg font-semibold text-center mt-8">${escapeHTML(rawContent)}</p>`;
+      return `<p>${escapeHTML(rawContent)}</p>`;
 
     default:
       console.warn(`Unknown section ID: ${id}. Valid sections are section1-section12.`);
