@@ -288,14 +288,14 @@ function generateFAQSection(lines: string[]): string {
     return "<p>No FAQs provided</p>";
   }
 
-  let html = '<h2 class="text-2xl font-bold mb-6">Frequently Asked Questions</h2>\n';
-  html += '<div class="space-y-4">\n';
+  let html = '<h2>Frequently Asked Questions</h2>\n';
+  html += '<div>\n';
 
   for (const faq of faqs) {
     html += `
-<details class="border border-gray-300 rounded-lg p-4">
-  <summary class="font-bold cursor-pointer">${escapeHTML(faq.question)}</summary>
-  <p class="mt-3 text-gray-700">${escapeHTML(faq.answer)}</p>
+<details>
+  <summary>${escapeHTML(faq.question)}</summary>
+  <p>${escapeHTML(faq.answer)}</p>
 </details>
 `;
   }
