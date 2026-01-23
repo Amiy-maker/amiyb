@@ -133,7 +133,7 @@ function generateHero(
   section: ParsedSection,
   imageUrls: Record<string, string>
 ): string {
-  const h1 = `<h1 class="text-4xl font-bold mb-4">${escapeHTML(content)}</h1>`;
+  const h1 = `<h1>${escapeHTML(content)}</h1>`;
 
   if (includeImages && rule.image?.position === "after" && section.images && section.images.length > 0) {
     const image = section.images[0];
