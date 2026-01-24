@@ -373,6 +373,9 @@ function getBlogStyles(): string {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
       line-height: 1.7;
       color: #2c3e50;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 20px;
     }
 
     .blog-content * {
