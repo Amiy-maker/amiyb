@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Generator - Complete User Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .feature-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        h2 {
+            font-size: 2em;
+            color: #1f2937;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 15px;
+        }
+        
+        h3 {
+            font-size: 1.4em;
+            color: #374151;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        h4 {
+            font-size: 1.1em;
+            color: #4b5563;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .section-step {
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .screenshot-placeholder {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            border: 2px dashed #9ca3af;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            color: #6b7280;
+            font-style: italic;
+        }
+        
+        .screenshot-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+            color: #4b5563;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+        }
+        
+        thead {
+            background-color: #f3f4f6;
+        }
+        
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        
+        th {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        .code-block {
+            background-color: #1f2937;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .info-box {
+            background-color: #dbeafe;
+            border-left: 4px solid #0284c7;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .info-box strong {
+            color: #0284c7;
+        }
+        
+        .warning-box {
+            background-color: #fed7aa;
+            border-left: 4px solid #ea580c;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .warning-box strong {
+            color: #ea580c;
+        }
+        
+        .success-box {
+            background-color: #dcfce7;
+            border-left: 4px solid #16a34a;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .success-box strong {
+            color: #16a34a;
+        }
+        
+        .toc {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+        }
+        
+        .toc ol {
+            margin: 15px 0;
+        }
+        
+        .toc a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        
+        .button-example {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin: 5px;
+            font-weight: 500;
+        }
+        
+        .example-content {
+            background-color: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>⚡ Blog Generator</h1>
+            <p class="subtitle">Complete User Guide & Documentation</p>
+            <p style="color: #6b7280; margin-bottom: 0;">Create SEO-optimized blog posts in minutes</p>
+            
+            <div class="features">
+                <div class="feature-badge">📤 Upload Documents</div>
+                <div class="feature-badge">✨ Auto HTML Generation</div>
+                <div class="feature-badge">🖼️ Image Management</div>
+                <div class="feature-badge">🛒 Shopify Integration</div>
+            </div>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="toc">
+            <h3>📋 Table of Contents</h3>
+            <ol>
+                <li><a href="#overview">Overview & Key Features</a></li>
+                <li><a href="#getting-started">Getting Started</a></li>
+                <li><a href="#how-to-use">How to Use: Step-by-Step</a></li>
+                <li><a href="#section-markers">Understanding Section Markers</a></li>
+                <li><a href="#writing-content">Writing Your Blog Content</a></li>
+                <li><a href="#generating-html">Generating HTML</a></li>
+                <li><a href="#image-upload">Image Upload & Management</a></li>
+                <li><a href="#exporting">Viewing & Exporting Results</a></li>
+                <li><a href="#shopify">Publishing to Shopify</a></li>
+                <li><a href="#tips">Tips & Best Practices</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+            </ol>
+        </div>
+
+        <!-- Overview Section -->
+        <h2 id="overview">Overview & Key Features</h2>
+        <p>The <strong>Blog Generator</strong> is a powerful web application designed to help you create professional, SEO-optimized blog posts with minimal effort. It automates the entire process from content organization to HTML generation and Shopify publishing.</p>
+
+        <div class="info-box">
+            <strong>ℹ️ What This Tool Does:</strong> It converts your blog content (organized with section markers) into clean, SEO-optimized HTML that's ready for publication on your website or Shopify store.
+        </div>
+
+        <h3>Key Features</h3>
+        <ul>
+            <li><strong>Smart Section System:</strong> 12 predefined section types with automatic HTML formatting</li>
+            <li><strong>Multiple Input Options:</strong> Upload documents (.txt, .md, .docx) or write directly in the editor</li>
+            <li><strong>Image Management:</strong> Upload images directly to Shopify during the generation process</li>
+            <li><strong>One-Click Publishing:</strong> Publish directly to your Shopify store with metadata</li>
+            <li><strong>SEO Optimization:</strong> Automatic HTML structure optimized for search engines</li>
+            <li><strong>Preview & Export:</strong> View results and download as HTML files</li>
+            <li><strong>Real-time Validation:</strong> Check for warnings and missing required sections</li>
+        </ul>
+
+        <!-- Getting Started -->
+        <h2 id="getting-started">Getting Started</h2>
+
+        <h3>Step 1: Access the Application</h3>
+        <p>Navigate to the Blog Generator at: <code>/blog/generator</code></p>
+
+        <div class="screenshot-placeholder">
+            <div class="screenshot-label">📸 Main Interface - Blog Generator</div>
+            The main application interface consists of three sections:
+            <ul style="text-align: left; display: inline-block; margin-top: 15px;">
+                <li><strong>Left Sidebar:</strong> Upload document card, Quick Insert buttons, Information panel</li>
+                <li><strong>Main Content Area:</strong> Editor/Preview tabs with text editor and HTML preview</li>
+                <li><strong>Action Buttons:</strong> Generate button and publishing options</li>
+            </ul>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">1</span>Understand the Interface</h4>
+            <p>The interface is divided into:</p>
+            <ul>
+                <li><strong>Left Panel:</strong> Document upload, section insertion shortcuts, metadata display</li>
+                <li><strong>Main Area:</strong> Text editor where you write and organize your content</li>
+                <li><strong>Action Buttons:</strong> Generate HTML and publish options</li>
+            </ul>
+        </div>
+
+        <!-- How to Use -->
+        <h2 id="how-to-use">How to Use: Step-by-Step</h2>
+
+        <h3>Option A: Upload an Existing Document</h3>
+
+        <div class="section-step">
+            <h4><span class="step-number">1</span>Click "Choose File" Button</h4>
+            <p>In the left sidebar, locate the <strong>"Upload Document"</strong> card and click the <strong>"Choose File"</strong> button.</p>
+            <div class="screenshot-placeholder">
+                <div class="screenshot-label">📸 Upload Document Card</div>
+                Shows the file upload button with supported formats (.txt, .md, .docx)
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>✓ Supported Formats:</strong> .txt (text), .md (markdown), .docx (Word documents)
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">2</span>Select Your File</h4>
+            <p>A file browser will open. Navigate to and select your document file. The system will read it and automatically load the content into the editor.</p>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">3</span>Confirm Upload</h4>
+            <p>Once selected, you'll see a success notification: <code>"Document '[filename]' loaded successfully"</code>. Your content is now in the editor and ready to be formatted with section markers.</p>
+        </div>
+
+        <h3>Option B: Write Content Directly in the Editor</h3>
+
+        <div class="section-step">
+            <h4><span class="step-number">1</span>Use the Editor Tab</h4>
+            <p>Click on the <strong>"Editor"</strong> tab (active by default) to access the text editor.</p>
+            <div class="screenshot-placeholder">
+                <div class="screenshot-label">📸 Editor Tab</div>
+                Shows the main text editing area with placeholder text
+            </div>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">2</span>Start Writing</h4>
+            <p>Click in the text area and begin typing your blog content. Write naturally as you would in any word processor.</p>
+        </div>
+
+        <!-- Section Markers -->
+        <h2 id="section-markers">Understanding Section Markers</h2>
+
+        <h3>What Are Section Markers?</h3>
+        <p>Section markers are special tags that divide your content into meaningful sections. Each section type has specific HTML formatting rules optimized for SEO and readability.</p>
+
+        <div class="info-box">
+            <strong>ℹ️ Format:</strong> Section markers use the format <code>{sectionX}</code> where X is a number from 1-12
+        </div>
+
+        <h3>The 12 Section Types</h3>
+        <p>Your blog post is divided into 12 predefined section types, each serving a specific purpose and optimized for search engines:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Section</th>
+                    <th>Name</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>{section1}</code></td>
+                    <td><strong>Hero/Title</strong></td>
+                    <td>Main headline and introduction</td>
+                </tr>
+                <tr>
+                    <td><code>{section2}</code></td>
+                    <td><strong>Intro Paragraph</strong></td>
+                    <td>Opening paragraph setting context</td>
+                </tr>
+                <tr>
+                    <td><code>{section3}</code></td>
+                    <td><strong>Table of Contents</strong></td>
+                    <td>Overview of what readers will learn</td>
+                </tr>
+                <tr>
+                    <td><code>{section4}</code></td>
+                    <td><strong>Key Benefits/Overview</strong></td>
+                    <td>Main benefits or overview of topic</td>
+                </tr>
+                <tr>
+                    <td><code>{section5}</code></td>
+                    <td><strong>Section Body</strong></td>
+                    <td>Main content sections</td>
+                </tr>
+                <tr>
+                    <td><code>{section6}</code></td>
+                    <td><strong>Statistics/Facts</strong></td>
+                    <td>Data, statistics, factual information</td>
+                </tr>
+                <tr>
+                    <td><code>{section7}</code></td>
+                    <td><strong>Comparison</strong></td>
+                    <td>Comparisons between options</td>
+                </tr>
+                <tr>
+                    <td><code>{section8}</code></td>
+                    <td><strong>Expert Quote</strong></td>
+                    <td>Quotes from experts or authorities</td>
+                </tr>
+                <tr>
+                    <td><code>{section9}</code></td>
+                    <td><strong>How-To Steps</strong></td>
+                    <td>Step-by-step instructions</td>
+                </tr>
+                <tr>
+                    <td><code>{section10}</code></td>
+                    <td><strong>Internal Links</strong></td>
+                    <td>Links to relevant articles</td>
+                </tr>
+                <tr>
+                    <td><code>{section11}</code></td>
+                    <td><strong>FAQs</strong></td>
+                    <td>Frequently Asked Questions</td>
+                </tr>
+                <tr>
+                    <td><code>{section12}</code></td>
+                    <td><strong>CTA/Conclusion</strong></td>
+                    <td>Call-to-Action and closing remarks</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Method 1: Using Quick Insert Buttons</h3>
+        <p>The easiest way to insert section markers is using the <strong>Quick Insert</strong> buttons in the left sidebar.</p>
+
+        <div class="screenshot-placeholder">
+            <div class="screenshot-label">📸 Quick Insert Buttons</div>
+            Shows all 12 quick insert buttons organized in the sidebar
+        </div>
+
+        <div class="section-step">
+            <h4>To Insert a Section:</h4>
+            <ol>
+                <li>Click where you want to insert the marker in the editor</li>
+                <li>Click the corresponding button (e.g., "section1 Hero/Title")</li>
+                <li>The marker will be automatically inserted at your cursor position</li>
+            </ol>
+        </div>
+
+        <h3>Method 2: Manual Typing</h3>
+        <p>You can also manually type section markers directly in the editor. Simply type <code>{section1}</code>, <code>{section2}</code>, etc., wherever you want to mark sections.</p>
+
+        <!-- Writing Content -->
+        <h2 id="writing-content">Writing Your Blog Content</h2>
+
+        <h3>Recommended Blog Post Structure</h3>
+        <p>Follow this proven structure for a well-organized, SEO-optimized blog post:</p>
+
+        <div class="example-content">
+            <div class="code-block">{section1}
+Your Blog Post Title
+
+{section2}
+This paragraph introduces the topic and explains what readers will learn.
+
+{section3}
+What You'll Learn:
+• Key point 1
+• Key point 2
+• Key point 3
+
+{section4}
+Main Benefits:
+- Benefit 1
+- Benefit 2
+- Benefit 3
+
+{section5}
+Main content with detailed information about your topic.
+
+{section6}
+Key statistics: According to research, 73% of marketers...
+
+{section9}
+Step 1: Action
+Step 2: Action
+Step 3: Action
+
+{section11}
+Q: Common question?
+A: Answer here
+
+{section12}
+Start taking action today! Learn more by contacting us.</div>
+        </div>
+
+        <h3>Content Writing Tips</h3>
+        <ul>
+            <li><strong>Write Naturally:</strong> Focus on providing value to your readers</li>
+            <li><strong>Use Clear Headings:</strong> Each section should have a descriptive heading</li>
+            <li><strong>Organize Logically:</strong> Flow from introduction to conclusion</li>
+            <li><strong>Be Specific:</strong> Use data, examples, and concrete details</li>
+            <li><strong>Include Calls-to-Action:</strong> Guide readers on what to do next</li>
+        </ul>
+
+        <!-- Generating HTML -->
+        <h2 id="generating-html">Generating HTML</h2>
+
+        <div class="section-step">
+            <h4><span class="step-number">1</span>Click "Generate Blog HTML"</h4>
+            <p>Once you've written your content with section markers, scroll to the bottom of the editor and click the <strong>"Generate Blog HTML"</strong> button.</p>
+            <div class="screenshot-placeholder">
+                <div class="screenshot-label">📸 Generate Button</div>
+                Shows the large button ready to be clicked
+            </div>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">2</span>Wait for Processing</h4>
+            <p>The system will:</p>
+            <ol>
+                <li>Validate your content and section markers</li>
+                <li>Check for any missing required sections</li>
+                <li>Extract any image keywords</li>
+                <li>Generate SEO-optimized HTML</li>
+            </ol>
+            <p>You'll see "Generating..." while processing.</p>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">3</span>Check for Warnings</h4>
+            <p>After generation, the system may display:</p>
+            <ul>
+                <li><strong>Validation Warnings</strong> (yellow) - Minor issues that don't prevent generation</li>
+                <li><strong>Missing Required Sections</strong> (red) - Critical sections that should be included</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Important:</strong> Address critical warnings and regenerate if needed before publishing.
+        </div>
+
+        <!-- Image Upload -->
+        <h2 id="image-upload">Image Upload & Management</h2>
+
+        <h3>When Images Are Required</h3>
+        <p>If your blog post references images (detected automatically), the system will show an <strong>"Upload Images to Shopify"</strong> section.</p>
+
+        <div class="screenshot-placeholder">
+            <div class="screenshot-label">📸 Image Upload Section</div>
+            Shows the image upload interface with upload buttons
+        </div>
+
+        <h3>Uploading Images</h3>
+        <div class="section-step">
+            <h4>For Each Image:</h4>
+            <ol>
+                <li>See the image keyword (e.g., "coffee-brewing", "office-setup")</li>
+                <li>Click the <strong>"Upload"</strong> button</li>
+                <li>Select an image file from your computer</li>
+                <li>The system uploads to Shopify automatically</li>
+                <li>Status shows "✓ Uploaded" once complete</li>
+            </ol>
+        </div>
+
+        <div class="info-box">
+            <strong>✓ Supported Formats:</strong> .jpg, .jpeg, .png, .webp, .gif
+        </div>
+
+        <h3>Modifying Images</h3>
+        <ul>
+            <li><strong>Change Image:</strong> Click "Change" to replace with a different image</li>
+            <li><strong>Remove Image:</strong> Click "Remove" to delete an uploaded image</li>
+        </ul>
+
+        <div class="warning-box">
+            <strong>⚠️ Important:</strong> All images must be uploaded before final HTML generation. The "Generate Blog HTML" button will be disabled until all images are uploaded.
+        </div>
+
+        <!-- Exporting Results -->
+        <h2 id="exporting">Viewing & Exporting Results</h2>
+
+        <div class="section-step">
+            <h4><span class="step-number">1</span>Switch to Preview Tab</h4>
+            <p>After successful generation, the system automatically switches to the <strong>"Preview"</strong> tab showing your generated HTML.</p>
+            <div class="screenshot-placeholder">
+                <div class="screenshot-label">📸 Preview Tab</div>
+                Shows the HTML code in a formatted view
+            </div>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">2</span>View Generated HTML</h4>
+            <p>The HTML code is displayed in a formatted box. This is your SEO-optimized blog post HTML ready for use.</p>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">3</span>Choose Your Next Action</h4>
+            <p>You have three options for your generated HTML:</p>
+        </div>
+
+        <h3>Option A: Copy to Clipboard</h3>
+        <ul>
+            <li>Click the <strong>"Copy"</strong> button</li>
+            <li>The HTML is copied to your clipboard</li>
+            <li>Paste it anywhere you need it (CMS, email, etc.)</li>
+        </ul>
+
+        <h3>Option B: Download as File</h3>
+        <ul>
+            <li>Click the <strong>"Download"</strong> button</li>
+            <li>An <code>blog-post.html</code> file downloads to your computer</li>
+            <li>Open it in any web browser to see the formatted blog post</li>
+        </ul>
+
+        <h3>Option C: Publish to Shopify</h3>
+        <ul>
+            <li>Click the green <strong>"Publish to Shopify"</strong> button</li>
+            <li>A modal dialog opens for publishing configuration</li>
+            <li>Enter publication details (title, author, tags, date)</li>
+            <li>Click "Publish" to send to your Shopify store</li>
+        </ul>
+
+        <!-- Shopify Publishing -->
+        <h2 id="shopify">Publishing to Shopify</h2>
+
+        <div class="section-step">
+            <h4><span class="step-number">1</span>Click "Publish to Shopify"</h4>
+            <p>In the Preview tab, click the green <strong>"Publish to Shopify"</strong> button.</p>
+            <div class="screenshot-placeholder">
+                <div class="screenshot-label">📸 Publish Button</div>
+                Shows the publish button location
+            </div>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">2</span>Configure Publication Details</h4>
+            <p>A modal dialog appears where you'll enter publication information:</p>
+            <div class="screenshot-placeholder">
+                <div class="screenshot-label">📸 Publish Modal</div>
+                Shows the publication configuration form
+            </div>
+        </div>
+
+        <h3>Required & Optional Fields</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Blog Title</strong></td>
+                    <td>Required *</td>
+                    <td>The title of your blog post</td>
+                </tr>
+                <tr>
+                    <td><strong>Author</strong></td>
+                    <td>Optional</td>
+                    <td>Name of the blog post author</td>
+                </tr>
+                <tr>
+                    <td><strong>Tags</strong></td>
+                    <td>Optional</td>
+                    <td>Comma-separated tags (e.g., "technology, business")</td>
+                </tr>
+                <tr>
+                    <td><strong>Publication Date</strong></td>
+                    <td>Optional</td>
+                    <td>When the post should be published (defaults to today)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Example Publication Data</h3>
+        <div class="example-content">
+            <p><strong>Blog Title:</strong> How to Optimize Your Blog for SEO</p>
+            <p><strong>Author:</strong> John Smith</p>
+            <p><strong>Tags:</strong> seo, blogging, digital-marketing</p>
+            <p><strong>Publication Date:</strong> 2024-01-15</p>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">3</span>Fill in the Information</h4>
+            <p>Complete the required "Blog Title" field and any optional fields you want to include. Then click <strong>"Publish"</strong>.</p>
+        </div>
+
+        <div class="section-step">
+            <h4><span class="step-number">4</span>Confirm Publication</h4>
+            <p>The system will:</p>
+            <ol>
+                <li>Validate your blog post</li>
+                <li>Upload it to your Shopify store</li>
+                <li>Assign the publication date</li>
+                <li>Add it to your blog section</li>
+            </ol>
+            <div class="success-box">
+                <strong>✓ Success Message:</strong> "Published to Shopify successfully!"
+            </div>
+        </div>
+
+        <!-- Tips & Best Practices -->
+        <h2 id="tips">Tips & Best Practices</h2>
+
+        <h3>Content Organization</h3>
+        <ul>
+            <li><strong>Always start with section1</strong> - Hero/Title is your main heading</li>
+            <li><strong>Follow with section2</strong> - Set up your topic with context</li>
+            <li><strong>Use section3</strong> - Help readers navigate with a table of contents</li>
+            <li><strong>Fill sections 4-11</strong> - Your main content and supporting information</li>
+            <li><strong>End with section12</strong> - Strong closing with clear call-to-action</li>
+        </ul>
+
+        <h3>SEO Optimization</h3>
+        <ul>
+            <li><strong>Use Descriptive Titles:</strong> Include keywords naturally in section headings</li>
+            <li><strong>Write for Readers First:</strong> Focus on providing genuine value</li>
+            <li><strong>Include Statistics:</strong> Add credibility with data and research</li>
+            <li><strong>Add Expert Quotes:</strong> Reference authorities in your field</li>
+            <li><strong>Use Internal Links:</strong> Link to other relevant content on your site</li>
+            <li><strong>Add Clear Instructions:</strong> Step-by-step information improves user experience</li>
+        </ul>
+
+        <h3>Image Best Practices</h3>
+        <ul>
+            <li><strong>Use High Quality:</strong> Minimum 1200px width for clarity</li>
+            <li><strong>Compress Images:</strong> Reduce file size for faster loading</li>
+            <li><strong>Descriptive Names:</strong> Use keyword-rich filenames for SEO</li>
+            <li><strong>Add Context:</strong> Include alt text descriptions in your content</li>
+        </ul>
+
+        <h3>Content Length Recommendations</h3>
+        <ul>
+            <li><strong>Total Length:</strong> Aim for 1,500-2,500 words</li>
+            <li><strong>Vary Section Length:</strong> Mix short and detailed sections</li>
+            <li><strong>Short Sections:</strong> Use for steps, FAQs, and lists (100-300 words)</li>
+            <li><strong>Longer Sections:</strong> Use for detailed explanations (500-800 words)</li>
+        </ul>
+
+        <h3>Publishing Strategy</h3>
+        <ul>
+            <li><strong>Consistency Beats Perfection:</strong> Regular publishing builds audience</li>
+            <li><strong>Ideal Frequency:</strong> 2-4 posts per month</li>
+            <li><strong>Follow a Schedule:</strong> Plan your publishing dates in advance</li>
+            <li><strong>Update Old Posts:</strong> Refresh older posts with new information quarterly</li>
+        </ul>
+
+        <!-- Troubleshooting -->
+        <h2 id="troubleshooting">Troubleshooting</h2>
+
+        <h3>Common Issues & Solutions</h3>
+
+        <div class="section-step">
+            <h4>❌ "Unsupported file format"</h4>
+            <p><strong>Solution:</strong> Ensure your file is .txt, .md, or .docx. Rename the file extension if necessary. Common issue: uploading .doc instead of .docx for Word files.</p>
+        </div>
+
+        <div class="section-step">
+            <h4>❌ "Please write some content first"</h4>
+            <p><strong>Solution:</strong> Add content to the editor before clicking Generate. Include at least one section marker {section1}, {section2}, etc.</p>
+        </div>
+
+        <div class="section-step">
+            <h4>❌ "Missing Required Sections"</h4>
+            <p><strong>Solution:</strong> Review the warning list and add the missing section types. Your blog needs essential sections like introduction and conclusion.</p>
+        </div>
+
+        <div class="section-step">
+            <h4>❌ "Images not uploading"</h4>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Check image file format (must be JPG, PNG, WebP, or GIF)</li>
+                <li>Ensure image file size isn't too large (under 5MB recommended)</li>
+                <li>Check your internet connection</li>
+                <li>Try uploading a different image to test</li>
+            </ul>
+        </div>
+
+        <div class="section-step">
+            <h4>❌ "Failed to publish to Shopify"</h4>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Verify your Shopify connection is configured correctly</li>
+                <li>Check that all required fields (Blog Title) are filled</li>
+                <li>Try again in a few moments</li>
+                <li>Check that you have write permissions for blogs</li>
+            </ul>
+        </div>
+
+        <div class="section-step">
+            <h4>❌ "HTML looks different in browser"</h4>
+            <p><strong>Solution:</strong> The preview tab shows raw HTML code. Open the downloaded .html file in your web browser to see the formatted result.</p>
+        </div>
+
+        <!-- Information Panel -->
+        <h3>Using the Information Panel</h3>
+        <p>The left sidebar includes an <strong>"Info"</strong> card that displays helpful metadata about your blog post:</p>
+
+        <div class="screenshot-placeholder">
+            <div class="screenshot-label">📸 Information Panel</div>
+            Shows metadata about total sections, word count, and warnings
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Total Sections</strong></td>
+                    <td>Always 12 - the total available section types</td>
+                </tr>
+                <tr>
+                    <td><strong>Words</strong></td>
+                    <td>Total word count of your generated blog post</td>
+                </tr>
+                <tr>
+                    <td><strong>Sections Used</strong></td>
+                    <td>How many of the 12 sections you've included</td>
+                </tr>
+                <tr>
+                    <td><strong>Warnings</strong></td>
+                    <td>Number of validation warnings (if any)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- File Limits -->
+        <h3>File Size Limits</h3>
+        <ul>
+            <li><strong>Document Upload:</strong> No official limit (typically up to 10MB)</li>
+            <li><strong>Image Upload:</strong> Recommended up to 5MB per image</li>
+            <li><strong>Generated HTML:</strong> Depends on content length and image references</li>
+        </ul>
+
+        <!-- Summary -->
+        <h2>Summary: The Complete Workflow</h2>
+
+        <div class="example-content">
+            <ol>
+                <li><strong>Input:</strong> Write content or upload a document</li>
+                <li><strong>Organize:</strong> Use section markers to structure content (12 types available)</li>
+                <li><strong>Generate:</strong> Click "Generate Blog HTML" to create SEO-optimized HTML</li>
+                <li><strong>Images:</strong> Upload any required images to Shopify</li>
+                <li><strong>Export:</strong> Copy to clipboard, download as file, or publish to Shopify</li>
+                <li><strong>Publish:</strong> Share your blog post with the world</li>
+            </ol>
+        </div>
+
+        <div class="success-box">
+            <strong>🎉 You did it!</strong> With these tools, you can create professional, SEO-optimized blog posts in minutes instead of hours.
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Blog Generator User Guide</strong></p>
+            <p>Complete documentation for creating and publishing blog posts</p>
+            <p>🚀 Happy blogging!</p>
+        </div>
+    </div>
+</body>
+</html>
