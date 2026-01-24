@@ -182,7 +182,7 @@ export default function BlogGenerator() {
     try {
       const payload: GenerateHTMLRequest = {
         document: documentContent,
-        format: "fragment",
+        format: "document",
         options: {
           includeSchema: true,
           includeImages: true,
