@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { parseDocument } from "../services/document-parser.js";
-import { generateHTML } from "../services/html-generator.js";
+import { generateStyledHTML } from "../services/html-generator.js";
 import { getShopifyClient } from "../services/shopify-client.js";
 
 export interface PublishShopifyRequest {
