@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { parseDocument } from "../services/document-parser.js";
-import { generateHTML } from "../services/html-generator.js";
+import { generateStyledHTML } from "../services/html-generator.js";
 import { getShopifyClient } from "../services/shopify-client.js";
 
 export interface PublishShopifyRequest {
@@ -45,8 +45,8 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
       });
     }
 
-    // Generate HTML
-    const bodyHtml = generateHTML(parsed, {
+    // Generate styled HTML (includes CSS for Shopify rendering)
+    const bodyHtml = generateStyledHTML(parsed, {
       includeSchema: true,
       includeImages: true,
       blogTitle: title,
