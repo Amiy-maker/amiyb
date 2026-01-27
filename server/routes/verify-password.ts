@@ -10,6 +10,10 @@ export const handleVerifyPassword: RequestHandler = (req, res) => {
 
   const correctPassword = process.env.APP_PASSWORD;
 
+  // Debug logging
+  console.log("APP_PASSWORD env var:", correctPassword ? "SET" : "NOT SET");
+  console.log("Password match:", password === correctPassword);
+
   if (password === correctPassword) {
     res.json({ success: true });
   } else {
