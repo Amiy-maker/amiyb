@@ -7,6 +7,7 @@ import { handleParseDocument } from "./routes/parse-document.js";
 import { handleGenerateHTML } from "./routes/generate-html.js";
 import { handlePublishShopify } from "./routes/publish-shopify.js";
 import { handleUploadImage } from "./routes/upload-image.js";
+import { handleVerifyPassword } from "./routes/verify-password.js";
 
 // Configure multer for file uploads (keep in memory for simplicity)
 const upload = multer({
