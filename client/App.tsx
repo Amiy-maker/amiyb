@@ -14,22 +14,43 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
+function ProtectedRoute({ element }: { element: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? element : <Navigate to="/login" replace />;
+}
+
+function AppRoutes() {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      {isAuthenticated && (
+        <>
+          <Route path="/" element={<Index />} />
+          <Route path="/blog/create" element={<BlogEditor />} />
+          <Route path="/blog/generator" element={<BlogGenerator />} />
+        </>
+      )}
+      {!isAuthenticated && <Route path="/" element={<Navigate to="/login" replace />} />}
+      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/blog/create" element={<BlogEditor />} />
-            <Route path="/blog/generator" element={<BlogGenerator />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
