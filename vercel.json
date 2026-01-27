@@ -2,11 +2,12 @@
   "buildCommand": "pnpm build:client",
   "outputDirectory": "dist/spa",
   "installCommand": "pnpm install",
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "@vercel/node@latest"
+    }
+  },
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
