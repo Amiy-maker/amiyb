@@ -237,7 +237,7 @@ function generateComparisonTable(lines: string[]): string {
   // Header row
   html += "<thead><tr>";
   for (const header of headers) {
-    html += `<th>${escapeHTML(header)}</th>`;
+    html += `<th>${textWithLinksToHTML(header)}</th>`;
   }
   html += "</tr></thead>\n";
 
@@ -246,7 +246,7 @@ function generateComparisonTable(lines: string[]): string {
   for (const row of rows) {
     html += "<tr>";
     for (const cell of row) {
-      html += `<td>${escapeHTML(cell)}</td>`;
+      html += `<td>${textWithLinksToHTML(cell)}</td>`;
     }
     html += "</tr>";
   }
