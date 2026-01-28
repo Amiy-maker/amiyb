@@ -10,6 +10,10 @@ interface ShopifyArticleInput {
   publishedAt?: string;
   tags?: string[];
   handle?: string;
+  image?: {
+    src: string;
+    alt?: string;
+  };
 }
 
 interface ShopifyGraphQLResponse {
