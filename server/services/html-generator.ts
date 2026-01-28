@@ -297,17 +297,17 @@ function generateFAQSection(lines: string[]): string {
   }
 
   if (faqs.length === 0) {
-    return "<p style=\"font-size: 1.05em; line-height: 1.8; margin-bottom: 25px; color: #3a3a3a;\">No FAQs provided</p>";
+    return "<p style=\"font-size: 1.05em; line-height: 1.8; margin-bottom: 15px; margin-top: 0; color: #3a3a3a;\">No FAQs provided</p>";
   }
 
-  let html = '<h2 style="font-size: 1.8em; font-weight: 600; margin-top: 50px; margin-bottom: 25px; line-height: 1.3; color: #1a1a1a; border-bottom: 3px solid #e8e8e8; padding-bottom: 12px;">Frequently Asked Questions</h2>\n';
+  let html = '<h2 style="font-size: 1.8em; font-weight: 600; margin-top: 25px; margin-bottom: 15px; line-height: 1.3; color: #1a1a1a; border-bottom: 3px solid #e8e8e8; padding-bottom: 12px;">Frequently Asked Questions</h2>\n';
   html += '<div>\n';
 
   for (const faq of faqs) {
     html += `
-<details style="margin: 25px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 6px; background-color: #fafafa; cursor: pointer; transition: all 0.3s ease;">
+<details style="margin: 15px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 6px; background-color: #fafafa; cursor: pointer; transition: all 0.3s ease;">
   <summary style="font-weight: 600; font-size: 1.1em; color: #1a1a1a; cursor: pointer; outline: none; user-select: none; padding: 5px 0;">${textWithLinksToHTML(faq.question)}</summary>
-  <p style="margin-top: 18px; margin-bottom: 0; font-size: 1em; color: #3a3a3a;">${textWithLinksToHTML(faq.answer)}</p>
+  <p style="margin-top: 12px; margin-bottom: 0; font-size: 1em; color: #3a3a3a;">${textWithLinksToHTML(faq.answer)}</p>
 </details>
 `;
   }
