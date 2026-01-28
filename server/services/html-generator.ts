@@ -392,21 +392,24 @@ function textWithLinksToHTML(text: string): string {
  * Check if a URL is valid and safe
  */
 function isValidURL(url: string): boolean {
-  try {
-    // Allow http, https, mailto, and relative URLs
-    if (url.startsWith("http://") || url.startsWith("https://") ||
-        url.startsWith("mailto:") || url.startsWith("/")) {
-      new URL(url.startsWith("http") ? url : "https://example.com" + (url.startsWith("/") ? url : "/" + url));
-      return true;
-    }
-    // Allow relative URLs without protocol
-    if (!url.includes("://") && !url.startsWith("javascript:") && !url.startsWith("data:")) {
-      return true;
-    }
-    return false;
-  } catch {
+  // Reject dangerous protocols
+  if (url.startsWith("javascript:") || url.startsWith("data:") || url.startsWith("vbscript:")) {
     return false;
   }
+
+  // Allow http, https, mailto, and relative URLs
+  if (url.startsWith("http://") || url.startsWith("https://") ||
+      url.startsWith("mailto:") || url.startsWith("/") ||
+      url.startsWith("#") || url.startsWith("?")) {
+    return true;
+  }
+
+  // Allow relative URLs (no protocol)
+  if (!url.includes("://")) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
