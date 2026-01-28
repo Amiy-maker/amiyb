@@ -93,6 +93,7 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
     const blogId = await shopifyClient.getBlogId();
 
     // Publish article with featured image as the article image field (not in body HTML)
+    console.log("Featured image URL for publication:", featuredImageUrl ? 'present' : 'missing');
     const articleId = await shopifyClient.publishArticle(blogId, {
       title,
       bodyHtml,
@@ -107,12 +108,26 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
       message: "Article published to Shopify successfully",
       articleId,
       metadata: parsed.metadata,
+      featuredImageIncluded: !!featuredImageUrl,
     });
   } catch (error) {
     console.error("Error publishing to Shopify:", error);
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isFeaturedImageError = errorMessage.includes('image') || errorMessage.includes('Image');
+
+    if (isFeaturedImageError) {
+      console.error("Featured image error detected:", errorMessage);
+      return res.status(400).json({
+        error: "Failed to set featured image on article",
+        details: errorMessage,
+        suggestion: "Ensure the featured image URL is valid and publicly accessible",
+      });
+    }
+
     res.status(500).json({
       error: "Failed to publish to Shopify",
-      details: error instanceof Error ? error.message : String(error),
+      details: errorMessage,
     });
   }
 };
