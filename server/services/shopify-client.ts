@@ -79,21 +79,31 @@ export class ShopifyClient {
     // Use REST API instead of GraphQL for simpler implementation
     const restUrl = `${this.baseUrl.replace("/graphql.json", "")}/blogs/${blogId}/articles.json`;
 
+    const articleData: any = {
+      title: article.title,
+      body_html: article.bodyHtml,
+      author: article.author || "Blog Generator",
+      published_at: article.publishedAt || new Date().toISOString(),
+      tags: article.tags?.join(",") || "",
+    };
+
+    // Include featured image if provided
+    if (article.image?.src) {
+      articleData.image = {
+        src: article.image.src,
+      };
+      if (article.image.alt) {
+        articleData.image.alt = article.image.alt;
+      }
+    }
+
     const response = await fetch(restUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Shopify-Access-Token": this.accessToken,
       },
-      body: JSON.stringify({
-        article: {
-          title: article.title,
-          body_html: article.bodyHtml,
-          author: article.author || "Blog Generator",
-          published_at: article.publishedAt || new Date().toISOString(),
-          tags: article.tags?.join(",") || "",
-        },
-      }),
+      body: JSON.stringify({ article: articleData }),
     });
 
     if (!response.ok) {
