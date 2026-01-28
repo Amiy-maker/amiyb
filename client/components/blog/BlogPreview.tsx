@@ -42,10 +42,10 @@ export function BlogPreview({ post }: BlogPreviewProps) {
               )}
 
               {/* Featured Image */}
-              {post.featuredImage.file && (
+              {(post.featuredImage.file || post.featuredImage.url) && (
                 <figure className="my-6">
                   <img
-                    src={URL.createObjectURL(post.featuredImage.file)}
+                    src={post.featuredImage.url || URL.createObjectURL(post.featuredImage.file!)}
                     alt={post.featuredImage.alt}
                     className="w-full h-64 object-cover rounded-lg"
                   />
