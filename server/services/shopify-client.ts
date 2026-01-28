@@ -255,19 +255,11 @@ export class ShopifyClient {
 
       // Add file
       const uint8Array = new Uint8Array(fileBuffer);
-      const headers: Record<string, string> = {};
-
-      // Include Content-Length for AWS S3 targets
-      if (uploadUrl.includes('amazonaws.com')) {
-        headers['Content-Length'] = String(fileBuffer.length + 5000);
-      }
-
       formData.append("file", new Blob([uint8Array], { type: mimeType }), filename);
 
       const uploadResponse = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
-        headers,
       });
 
       if (!uploadResponse.ok) {
@@ -326,8 +318,8 @@ export class ShopifyClient {
         const fileId = createdFile.id;
         console.log("File uploaded but not yet processed, polling for image URL. File ID:", fileId);
 
-        for (let i = 0; i < 10; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+        for (let i = 0; i < 30; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
 
           const pollQuery = `
             query getFile($id: ID!) {
@@ -344,20 +336,33 @@ export class ShopifyClient {
                   id
                   fileStatus
                   preview { image { url } status }
+                  url
                 }
               }
             }
           `;
 
           const pollResponse = await this.graphql(pollQuery, { id: fileId });
+
+          if (pollResponse.errors) {
+            console.error("Poll error:", pollResponse.errors);
+            continue;
+          }
+
           const node = pollResponse.data?.node;
 
-          if (!node) break;
+          if (!node) {
+            console.log(`Poll attempt ${i + 1}: Node not found, retrying...`);
+            continue;
+          }
 
           const status = node.fileStatus || node.preview?.status;
           const previewUrl = node.preview?.image?.url;
           const imageUrlDirect = node.image?.url;
-          const url = previewUrl || imageUrlDirect;
+          const genericUrl = node.url;
+          const url = previewUrl || imageUrlDirect || genericUrl;
+
+          console.log(`Poll attempt ${i + 1}: Status ${status}, previewUrl: ${!!previewUrl}, imageUrl: ${!!imageUrlDirect}, genericUrl: ${!!genericUrl}`);
 
           if (url) {
             imageUrl = url;
@@ -366,8 +371,8 @@ export class ShopifyClient {
           }
 
           if (status === 'READY') {
-            console.log(`File status is READY but no URL found yet`);
-            break;
+            console.log(`File status is READY but no URL found yet, continuing to poll...`);
+            continue;
           }
 
           console.log(`Poll attempt ${i + 1}: File status is ${status}, waiting...`);
@@ -375,9 +380,12 @@ export class ShopifyClient {
       }
 
       if (!imageUrl) {
-        // Fallback to resourceUrl if processing is delayed, but warn about it
-        console.warn("Image URL not obtained from preview, using resourceUrl as fallback:", resourceUrl);
-        imageUrl = resourceUrl;
+        // If we still don't have a URL after polling, throw an error
+        // The staging resourceUrl won't be accessible to Shopify when rendering the article
+        throw new Error(
+          "Image processing timeout: Shopify took too long to process the image. " +
+          "Please try uploading again. If the problem persists, check that your image file is valid."
+        );
       }
 
       console.log("Successfully uploaded image. Final URL:", imageUrl);
