@@ -85,7 +85,7 @@ function generateSectionHTML(
       return generateHero(rawContent, rule, includeImages, section, imageUrls);
 
     case "section2":
-      return `<p>${escapeHTML(rawContent)}</p>`;
+      return `<p>${textWithLinksToHTML(rawContent)}</p>`;
 
     case "section3":
       return generateList(lines, "ul", "Table of Contents");
@@ -97,13 +97,13 @@ function generateSectionHTML(
       return generateSectionBody(rawContent, includeImages, section, imageUrls);
 
     case "section6":
-      return `<blockquote>${escapeHTML(rawContent)}</blockquote>`;
+      return `<blockquote>${textWithLinksToHTML(rawContent)}</blockquote>`;
 
     case "section7":
       return generateComparisonTable(lines);
 
     case "section8":
-      return `<blockquote>${escapeHTML(rawContent)}</blockquote>`;
+      return `<blockquote>${textWithLinksToHTML(rawContent)}</blockquote>`;
 
     case "section9":
       return generateList(lines, "ol", "Steps");
@@ -115,7 +115,7 @@ function generateSectionHTML(
       return generateFAQSection(lines);
 
     case "section12":
-      return `<p>${escapeHTML(rawContent)}</p>`;
+      return `<p>${textWithLinksToHTML(rawContent)}</p>`;
 
     default:
       console.warn(`Unknown section ID: ${id}. Valid sections are section1-section12.`);
