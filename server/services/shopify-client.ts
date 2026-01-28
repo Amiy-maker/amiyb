@@ -77,7 +77,7 @@ export class ShopifyClient {
     this.validateCredentials();
 
     // Use REST API instead of GraphQL for simpler implementation
-    const restUrl = `${this.baseUrl.replace("/graphql.json", "")}/blogs/${blogId}/articles.json`;
+    const restUrl = `${this.baseUrl}/blogs/${blogId}/articles.json`;
 
     const articleData: any = {
       title: article.title,
