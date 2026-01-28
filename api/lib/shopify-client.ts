@@ -120,13 +120,32 @@ export class ShopifyClient {
       }),
     });
 
+    const responseData = await response.json() as any;
+
     if (!response.ok) {
-      const error = await response.text();
+      const error = JSON.stringify(responseData, null, 2);
       throw new Error(`Failed to publish article: ${error}`);
     }
 
-    const data = await response.json() as { article: { id: string; title: string; handle: string } };
-    return data.article.id;
+    if (responseData.errors) {
+      throw new Error(`Shopify API error: ${JSON.stringify(responseData.errors)}`);
+    }
+
+    const articleId = responseData.article?.id;
+    if (!articleId) {
+      throw new Error("Failed to get article ID from response");
+    }
+
+    // Log article details including image
+    const publishedArticle = responseData.article;
+    console.log(`Article created successfully. Article ID: ${articleId}`);
+    console.log(`Article image field set: ${!!publishedArticle.image}`);
+    if (publishedArticle.image) {
+      console.log(`  Image src: ${publishedArticle.image.src}`);
+      console.log(`  Image alt: ${publishedArticle.image.alt || 'N/A'}`);
+    }
+
+    return articleId;
   }
 
   /**
