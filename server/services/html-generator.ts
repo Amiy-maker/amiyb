@@ -96,7 +96,7 @@ function generateSectionHTML(
       return generateHero(rawContent, rule, includeImages, section, imageUrls);
 
     case "section2":
-      return `<p>${textWithLinksToHTML(rawContent)}</p>`;
+      return `<p style="font-size: 1.05em; line-height: 1.8; margin-bottom: 25px; color: #3a3a3a;">${textWithLinksToHTML(rawContent)}</p>`;
 
     case "section3":
       return generateList(lines, "ul", "Table of Contents");
