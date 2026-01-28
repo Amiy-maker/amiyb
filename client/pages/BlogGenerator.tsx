@@ -580,6 +580,69 @@ export default function BlogGenerator() {
               </CardContent>
             </Card>
 
+            {/* Featured Image Card */}
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="text-lg">Featured Image</CardTitle>
+                <CardDescription>Hero/banner image for blog</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {featuredImage?.url ? (
+                  <div className="space-y-3">
+                    <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                      <img
+                        src={featuredImage.url}
+                        alt="Featured"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => featuredImageInputRef.current?.click()}
+                        disabled={featuredImage.uploading}
+                        className="flex-1 gap-2"
+                      >
+                        <Edit2 size={14} />
+                        {featuredImage.uploading ? "Uploading..." : "Change"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={removeFeaturedImage}
+                        className="flex-1 gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 size={14} />
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      ref={featuredImageInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={handleFeaturedImageSelect}
+                      className="hidden"
+                    />
+                    <Button
+                      onClick={() => featuredImageInputRef.current?.click()}
+                      variant="outline"
+                      className="w-full gap-2"
+                    >
+                      <Upload size={16} />
+                      Upload Image
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-3">
+                      Supports: JPG, PNG, WebP, GIF
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Quick Insert</CardTitle>
