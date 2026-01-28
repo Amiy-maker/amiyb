@@ -36,6 +36,7 @@ export function generateHTML(
     blogDate,
     authorName,
     imageUrls = {},
+    featuredImageUrl,
   } = options;
 
   const sections: string[] = [];
@@ -45,6 +46,17 @@ export function generateHTML(
     const schema = generateArticleSchema(blogTitle, blogDate, authorName);
     console.log("Generated schema markup:", schema.length, "characters");
     sections.push(schema);
+  }
+
+  // Add featured image if provided
+  if (includeImages && featuredImageUrl) {
+    console.log("Adding featured image to HTML:", featuredImageUrl);
+    // Use inline styles instead of classes because some platforms strip <style> tags
+    // This ensures the featured image styling persists when used with Shopify
+    const featuredImageHtml = `<img src="${featuredImageUrl}" alt="Featured" style="width: 100%; max-width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin: 0 0 40px 0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); display: block;" />`;
+    sections.push(featuredImageHtml);
+  } else {
+    console.log("Featured image not included. includeImages:", includeImages, "featuredImageUrl:", featuredImageUrl);
   }
 
   // Generate HTML for each section
