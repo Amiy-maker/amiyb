@@ -19,6 +19,7 @@ export interface HTMLGeneratorOptions {
   blogDate?: string;
   authorName?: string;
   imageUrls?: Record<string, string>; // Maps image keyword to Shopify URL
+  featuredImageUrl?: string; // Featured/hero image URL
 }
 
 /**
