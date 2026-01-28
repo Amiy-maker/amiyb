@@ -71,12 +71,12 @@ export function generateBlogHTML(post: BlogPost, featuredImageUrl?: string): str
         }
       }
     });
-    if (post.sections.types.comparisonImage.file) {
-      const imgSrc = URL.createObjectURL(
-        post.sections.types.comparisonImage.file
+    if (post.sections.types.comparisonImage.file || post.sections.types.comparisonImage.url) {
+      const imgSrc = post.sections.types.comparisonImage.url || URL.createObjectURL(
+        post.sections.types.comparisonImage.file!
       );
       parts.push(
-        `<img src="${imgSrc}" alt="${escapeHtml(post.sections.types.comparisonImage.alt)}" />`
+        `<img src="${imgSrc}" alt="${escapeHtml(post.sections.types.comparisonImage.alt)}" style="width: 100%; height: auto; margin: 1.5rem 0; border-radius: 8px;" />`
       );
     }
     parts.push("");
