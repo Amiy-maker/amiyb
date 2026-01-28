@@ -249,7 +249,7 @@ function generateComparisonTable(lines: string[]): string {
   // Header row
   html += '<thead style="background: linear-gradient(135deg, #f5f5f5 0%, #ebebeb 100%);"><tr>';
   for (const header of headers) {
-    html += `<th style="padding: 18px; text-align: left; font-weight: 600; color: #1a1a1a; border-bottom: 2px solid #d0d0d0; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.5px;">${textWithLinksToHTML(header)}</th>`;
+    html += `<th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #1a1a1a; border-bottom: 2px solid #d0d0d0; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.5px;">${textWithLinksToHTML(header)}</th>`;
   }
   html += "</tr></thead>\n";
 
