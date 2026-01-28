@@ -86,17 +86,16 @@ export default function BlogGenerator() {
   };
 
   /**
-   * Convert HTML to plain text while preserving links in markdown format
+   * Convert HTML to plain text while preserving links in markdown format and proper spacing
    */
   const htmlToTextWithLinks = (html: string): string => {
     // Create a temporary DOM element to parse HTML
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
 
-    const processNode = (node: Node): string => {
+    const processNode = (node: Node, isInList: boolean = false): string => {
       if (node.nodeType === Node.TEXT_NODE) {
         const text = node.textContent || "";
-        // Preserve whitespace for list items and other content
         return text;
       }
 
@@ -107,7 +106,7 @@ export default function BlogGenerator() {
         // Handle links: preserve as [text](url)
         if (tagName === "a") {
           const linkText = Array.from(element.childNodes)
-            .map(n => processNode(n))
+            .map(n => processNode(n, isInList))
             .join("")
             .trim();
           const href = element.getAttribute("href") || "";
@@ -117,48 +116,59 @@ export default function BlogGenerator() {
         // Handle headings
         if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(tagName)) {
           const content = Array.from(element.childNodes)
-            .map(n => processNode(n))
+            .map(n => processNode(n, isInList))
             .join("")
             .trim();
-          return content + "\n\n";
+          return content ? content + "\n\n" : "";
         }
 
-        // Handle paragraphs, divs, and other block elements
-        if (["p", "div", "section", "article", "li"].includes(tagName)) {
-          const content = Array.from(element.childNodes)
-            .map(n => processNode(n))
-            .join("")
-            .trim();
-          return content ? content + "\n" : "";
-        }
-
-        // Handle lists - wrap items with bullets
+        // Handle unordered lists
         if (tagName === "ul") {
-          const items = Array.from(element.querySelectorAll("li"))
+          const items = Array.from(element.childNodes)
+            .filter(node => node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName.toLowerCase() === "li")
             .map(li => {
-              const text = Array.from(li.childNodes)
-                .map(n => processNode(n))
+              const text = Array.from((li as Element).childNodes)
+                .map(n => processNode(n, true))
                 .join("")
                 .trim();
               return text ? "- " + text : "";
             })
             .filter(item => item.length > 0)
             .join("\n");
-          return items ? items + "\n" : "";
+          return items ? items + "\n\n" : "";
         }
 
+        // Handle ordered lists
         if (tagName === "ol") {
-          const items = Array.from(element.querySelectorAll("li"))
+          const items = Array.from(element.childNodes)
+            .filter(node => node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName.toLowerCase() === "li")
             .map((li, idx) => {
-              const text = Array.from(li.childNodes)
-                .map(n => processNode(n))
+              const text = Array.from((li as Element).childNodes)
+                .map(n => processNode(n, true))
                 .join("")
                 .trim();
               return text ? `${idx + 1}. ${text}` : "";
             })
             .filter(item => item.length > 0)
             .join("\n");
-          return items ? items + "\n" : "";
+          return items ? items + "\n\n" : "";
+        }
+
+        // Handle list items when inside lists
+        if (tagName === "li" && isInList) {
+          return Array.from(element.childNodes)
+            .map(n => processNode(n, true))
+            .join("")
+            .trim();
+        }
+
+        // Handle paragraphs and other block elements
+        if (["p", "div", "section", "article", "blockquote"].includes(tagName)) {
+          const content = Array.from(element.childNodes)
+            .map(n => processNode(n, isInList))
+            .join("")
+            .trim();
+          return content ? content + "\n\n" : "";
         }
 
         // Handle table
@@ -167,19 +177,19 @@ export default function BlogGenerator() {
             .map(tr => {
               const cells = Array.from(tr.querySelectorAll("td, th"))
                 .map(cell => Array.from(cell.childNodes)
-                  .map(n => processNode(n))
+                  .map(n => processNode(n, isInList))
                   .join("")
                   .trim()
                 );
               return cells.join(" | ");
             })
             .filter(row => row.length > 0);
-          return rows.join("\n") + "\n";
+          return rows.join("\n") + "\n\n";
         }
 
         // For other elements, process children recursively
         return Array.from(element.childNodes)
-          .map(n => processNode(n))
+          .map(n => processNode(n, isInList))
           .join("");
       }
 
@@ -188,12 +198,28 @@ export default function BlogGenerator() {
 
     let text = processNode(doc.body);
 
-    // Clean up excessive whitespace
-    return text
-      .split("\n")
-      .map(line => line.trim())
-      .filter(line => line.length > 0)
-      .join("\n");
+    // Clean up excessive whitespace while preserving double newlines for spacing
+    const lines = text.split("\n");
+    const result: string[] = [];
+    let emptyCount = 0;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.length === 0) {
+        emptyCount++;
+        // Only keep up to 2 consecutive empty lines
+        if (emptyCount <= 2) {
+          result.push("");
+        }
+      } else {
+        emptyCount = 0;
+        result.push(trimmed);
+      }
+    }
+
+    return result
+      .join("\n")
+      .trim();
   };
 
   /**
