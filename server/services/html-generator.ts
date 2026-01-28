@@ -157,7 +157,7 @@ function generateList(
   title?: string
 ): string {
   const tag = listType === "ul" ? "ul" : "ol";
-  const items = lines.map((line) => `<li>${escapeHTML(line)}</li>`).join("\n");
+  const items = lines.map((line) => `<li>${textWithLinksToHTML(line)}</li>`).join("\n");
 
   let html = `<${tag}>\n${items}\n</${tag}>`;
 
