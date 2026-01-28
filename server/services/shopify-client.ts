@@ -326,17 +326,22 @@ export class ShopifyClient {
         const fileId = createdFile.id;
         console.log("File uploaded but not yet processed, polling for image URL. File ID:", fileId);
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10; i++) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
           const pollQuery = `
             query getFile($id: ID!) {
               node(id: $id) {
                 ... on MediaImage {
+                  id
                   fileStatus
                   preview { image { url } status }
+                  image {
+                    url
+                  }
                 }
                 ... on GenericFile {
+                  id
                   fileStatus
                   preview { image { url } status }
                 }
@@ -350,7 +355,9 @@ export class ShopifyClient {
           if (!node) break;
 
           const status = node.fileStatus || node.preview?.status;
-          const url = node.preview?.image?.url;
+          const previewUrl = node.preview?.image?.url;
+          const imageUrlDirect = node.image?.url;
+          const url = previewUrl || imageUrlDirect;
 
           if (url) {
             imageUrl = url;
@@ -358,15 +365,18 @@ export class ShopifyClient {
             break;
           }
 
-          if (status === 'READY') break;
+          if (status === 'READY') {
+            console.log(`File status is READY but no URL found yet`);
+            break;
+          }
 
           console.log(`Poll attempt ${i + 1}: File status is ${status}, waiting...`);
         }
       }
 
       if (!imageUrl) {
-        // Fallback to resourceUrl if processing is delayed
-        console.warn("Image URL not obtained from preview, using resourceUrl as fallback");
+        // Fallback to resourceUrl if processing is delayed, but warn about it
+        console.warn("Image URL not obtained from preview, using resourceUrl as fallback:", resourceUrl);
         imageUrl = resourceUrl;
       }
 
