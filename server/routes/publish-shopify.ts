@@ -10,11 +10,12 @@ export interface PublishShopifyRequest {
   tags?: string[];
   publicationDate?: string;
   imageUrls?: Record<string, string>; // Maps image keyword to Shopify URL
+  featuredImageUrl?: string; // Featured/hero image URL
 }
 
 export const handlePublishShopify: RequestHandler = async (req, res) => {
   try {
-    const { document, title, author, tags, publicationDate, imageUrls } = req.body as PublishShopifyRequest;
+    const { document, title, author, tags, publicationDate, imageUrls, featuredImageUrl } = req.body as PublishShopifyRequest;
 
     if (!document || !title) {
       return res.status(400).json({
