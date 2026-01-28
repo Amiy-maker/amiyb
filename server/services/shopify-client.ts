@@ -344,20 +344,33 @@ export class ShopifyClient {
                   id
                   fileStatus
                   preview { image { url } status }
+                  url
                 }
               }
             }
           `;
 
           const pollResponse = await this.graphql(pollQuery, { id: fileId });
+
+          if (pollResponse.errors) {
+            console.error("Poll error:", pollResponse.errors);
+            continue;
+          }
+
           const node = pollResponse.data?.node;
 
-          if (!node) break;
+          if (!node) {
+            console.log(`Poll attempt ${i + 1}: Node not found, retrying...`);
+            continue;
+          }
 
           const status = node.fileStatus || node.preview?.status;
           const previewUrl = node.preview?.image?.url;
           const imageUrlDirect = node.image?.url;
-          const url = previewUrl || imageUrlDirect;
+          const genericUrl = node.url;
+          const url = previewUrl || imageUrlDirect || genericUrl;
+
+          console.log(`Poll attempt ${i + 1}: Status ${status}, previewUrl: ${!!previewUrl}, imageUrl: ${!!imageUrlDirect}, genericUrl: ${!!genericUrl}`);
 
           if (url) {
             imageUrl = url;
@@ -366,8 +379,8 @@ export class ShopifyClient {
           }
 
           if (status === 'READY') {
-            console.log(`File status is READY but no URL found yet`);
-            break;
+            console.log(`File status is READY but no URL found yet, continuing to poll...`);
+            continue;
           }
 
           console.log(`Poll attempt ${i + 1}: File status is ${status}, waiting...`);
