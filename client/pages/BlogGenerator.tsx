@@ -610,14 +610,30 @@ export default function BlogGenerator() {
                 <CardDescription>Hero/banner image for blog</CardDescription>
               </CardHeader>
               <CardContent>
-                {featuredImage?.url ? (
+                {featuredImage && (featuredImage.url || featuredImage.uploading) ? (
                   <div className="space-y-3">
                     <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                      <img
-                        src={featuredImage.url}
-                        alt="Featured"
-                        className="w-full h-full object-cover"
-                      />
+                      {featuredImage.uploading ? (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600">Uploading...</p>
+                          </div>
+                        </div>
+                      ) : featuredImage.url ? (
+                        <img
+                          src={featuredImage.url}
+                          alt="Featured"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error("Failed to load featured image:", featuredImage.url);
+                            toast.error("Failed to load featured image from Shopify");
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <p className="text-sm text-gray-500">No image URL returned</p>
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       <Button
