@@ -93,6 +93,12 @@ export class ShopifyClient {
       // Ensure the URL is properly formatted for Shopify
       const imageUrl = article.image.src;
 
+      // Validate URL format
+      if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+        console.error('Invalid featured image URL format:', imageUrl);
+        throw new Error(`Featured image URL must be absolute (http/https): ${imageUrl}`);
+      }
+
       articleData.image = {
         src: imageUrl,
       };
@@ -102,6 +108,8 @@ export class ShopifyClient {
       }
 
       console.log(`Publishing article with featured image URL: ${imageUrl}`);
+    } else {
+      console.warn('No featured image provided for article');
     }
 
     const response = await fetch(restUrl, {
