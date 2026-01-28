@@ -255,19 +255,11 @@ export class ShopifyClient {
 
       // Add file
       const uint8Array = new Uint8Array(fileBuffer);
-      const headers: Record<string, string> = {};
-
-      // Include Content-Length for AWS S3 targets
-      if (uploadUrl.includes('amazonaws.com')) {
-        headers['Content-Length'] = String(fileBuffer.length + 5000);
-      }
-
       formData.append("file", new Blob([uint8Array], { type: mimeType }), filename);
 
       const uploadResponse = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
-        headers,
       });
 
       if (!uploadResponse.ok) {
