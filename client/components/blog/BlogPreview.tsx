@@ -7,7 +7,7 @@ interface BlogPreviewProps {
 }
 
 export function BlogPreview({ post }: BlogPreviewProps) {
-  const htmlContent = generateBlogHTML(post);
+  const htmlContent = generateBlogHTML(post, post.featuredImage.url);
 
   return (
     <div className="bg-white h-full flex flex-col">
