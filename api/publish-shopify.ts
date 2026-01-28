@@ -118,6 +118,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Publish article with featured image as the article image field (not in body HTML)
     console.log(`[${new Date().toISOString()}] Publishing article to Shopify...`);
+    console.log(`[${new Date().toISOString()}] Featured image URL for publication: ${featuredImageUrl ? 'present' : 'missing'}`);
+
     const articleId = await shopifyClient.publishArticle(blogId, {
       title,
       bodyHtml,
@@ -133,12 +135,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       message: "Article published to Shopify successfully",
       articleId,
       metadata: parsed.metadata,
+      featuredImageIncluded: !!featuredImageUrl,
     });
   } catch (error) {
     console.error(`[${new Date().toISOString()}] Error publishing to Shopify:`, error);
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isFeaturedImageError = errorMessage.includes('image') || errorMessage.includes('Image');
+
+    if (isFeaturedImageError) {
+      console.error(`[${new Date().toISOString()}] Featured image error detected:`, errorMessage);
+      return res.status(400).json({
+        error: "Failed to set featured image on article",
+        details: errorMessage,
+        suggestion: "Ensure the featured image URL is valid and publicly accessible",
+      });
+    }
+
     return res.status(500).json({
       error: "Failed to publish to Shopify",
-      details: error instanceof Error ? error.message : String(error),
+      details: errorMessage,
     });
   }
 }
