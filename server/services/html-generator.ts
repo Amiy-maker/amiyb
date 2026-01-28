@@ -655,18 +655,19 @@ function getBlogStyles(): string {
 
 /**
  * Generate HTML with embedded styles (for Shopify/external publishing)
- * Includes both <style> tag and inline styles for maximum compatibility
+ * Uses inline styles only for maximum compatibility with Shopify and other platforms
+ * that strip <style> tags for security reasons
  */
 export function generateStyledHTML(
   parsed: ParsedDocument,
   options: HTMLGeneratorOptions = {}
 ): string {
   const content = generateHTML(parsed, options);
-  const styles = getBlogStyles();
 
-  // Include both <style> tag and wrapper with inline styles for compatibility
-  // Some Shopify stores allow <style> tags, others don't - this ensures styling works either way
-  return `<style>${styles}</style>\n<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; line-height: 1.7; color: #2c3e50; max-width: 720px; margin: 0 auto; padding: 20px 0;" class="blog-content">\n${content}\n</div>`;
+  // Shopify and other platforms strip <style> tags for security
+  // All styling uses inline styles on individual elements
+  // Wrapper div includes core typography and layout styles
+  return `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; line-height: 1.7; color: #2c3e50; max-width: 720px; margin: 0 auto; padding: 20px 0;">\n${content}\n</div>`;
 }
 
 /**

@@ -88,13 +88,20 @@ export class ShopifyClient {
     };
 
     // Include featured image if provided
+    // Shopify REST API expects image.src to be a valid, publicly accessible URL
     if (article.image?.src) {
+      // Ensure the URL is properly formatted for Shopify
+      const imageUrl = article.image.src;
+
       articleData.image = {
-        src: article.image.src,
+        src: imageUrl,
       };
+
       if (article.image.alt) {
         articleData.image.alt = article.image.alt;
       }
+
+      console.log(`Publishing article with featured image URL: ${imageUrl}`);
     }
 
     const response = await fetch(restUrl, {
@@ -108,10 +115,12 @@ export class ShopifyClient {
 
     if (!response.ok) {
       const error = await response.text();
+      console.error("Article creation failed:", error);
       throw new Error(`Failed to publish article: ${error}`);
     }
 
     const data = await response.json() as { article: { id: string; title: string; handle: string } };
+    console.log(`Article created successfully. Article ID: ${data.article.id}`);
     return data.article.id;
   }
 
@@ -317,17 +326,22 @@ export class ShopifyClient {
         const fileId = createdFile.id;
         console.log("File uploaded but not yet processed, polling for image URL. File ID:", fileId);
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10; i++) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
           const pollQuery = `
             query getFile($id: ID!) {
               node(id: $id) {
                 ... on MediaImage {
+                  id
                   fileStatus
                   preview { image { url } status }
+                  image {
+                    url
+                  }
                 }
                 ... on GenericFile {
+                  id
                   fileStatus
                   preview { image { url } status }
                 }
@@ -341,7 +355,9 @@ export class ShopifyClient {
           if (!node) break;
 
           const status = node.fileStatus || node.preview?.status;
-          const url = node.preview?.image?.url;
+          const previewUrl = node.preview?.image?.url;
+          const imageUrlDirect = node.image?.url;
+          const url = previewUrl || imageUrlDirect;
 
           if (url) {
             imageUrl = url;
@@ -349,15 +365,18 @@ export class ShopifyClient {
             break;
           }
 
-          if (status === 'READY') break;
+          if (status === 'READY') {
+            console.log(`File status is READY but no URL found yet`);
+            break;
+          }
 
           console.log(`Poll attempt ${i + 1}: File status is ${status}, waiting...`);
         }
       }
 
       if (!imageUrl) {
-        // Fallback to resourceUrl if processing is delayed
-        console.warn("Image URL not obtained from preview, using resourceUrl as fallback");
+        // Fallback to resourceUrl if processing is delayed, but warn about it
+        console.warn("Image URL not obtained from preview, using resourceUrl as fallback:", resourceUrl);
         imageUrl = resourceUrl;
       }
 
