@@ -53,6 +53,7 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
       blogTitle: title,
       authorName: author,
       imageUrls: imageUrls || {},
+      featuredImageUrl,
     });
 
     // Publish to Shopify
