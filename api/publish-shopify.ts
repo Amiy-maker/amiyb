@@ -66,6 +66,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Generate HTML
+    // Important: DO NOT include featured image in body HTML - it will be set as the article image field
+    // This ensures the featured image appears in Shopify's "Image" field, not in the content
     console.log(`[${new Date().toISOString()}] Generating HTML for article...`);
     const bodyHtml = generateHTML(parsed, {
       includeSchema: true,
@@ -73,8 +75,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       blogTitle: title,
       authorName: author,
       imageUrls: imageUrls || {},
+      // CRITICAL: Don't pass featuredImageUrl here - we set it separately as article.image
+      featuredImageUrl: undefined,
     });
     console.log(`[${new Date().toISOString()}] HTML generated. Size: ${bodyHtml.length} characters`);
+    console.log("Publishing with featured image URL:", featuredImageUrl);
 
     // Publish to Shopify
     console.log(`[${new Date().toISOString()}] Connecting to Shopify...`);
