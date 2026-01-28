@@ -108,13 +108,13 @@ function generateSectionHTML(
       return generateSectionBody(rawContent, includeImages, section, imageUrls);
 
     case "section6":
-      return `<blockquote>${textWithLinksToHTML(rawContent)}</blockquote>`;
+      return `<blockquote style="border-left: 5px solid #d4a574; padding: 25px 30px; margin: 40px 0; background-color: #fef9f5; font-style: italic; font-size: 1.15em; color: #5a5a5a; line-height: 1.8;">${textWithLinksToHTML(rawContent)}</blockquote>`;
 
     case "section7":
       return generateComparisonTable(lines);
 
     case "section8":
-      return `<blockquote>${textWithLinksToHTML(rawContent)}</blockquote>`;
+      return `<blockquote style="border-left: 5px solid #d4a574; padding: 25px 30px; margin: 40px 0; background-color: #fef9f5; font-style: italic; font-size: 1.15em; color: #5a5a5a; line-height: 1.8;">${textWithLinksToHTML(rawContent)}</blockquote>`;
 
     case "section9":
       return generateList(lines, "ol", "Steps");
