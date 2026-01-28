@@ -22,8 +22,10 @@ export function validateBlogPost(post: BlogPost): ValidationState {
   }
 
   // 3. Featured Image
-  if (!post.featuredImage.file) {
+  if (!post.featuredImage.file && !post.featuredImage.url) {
     errors.push("Featured image is required");
+  } else if (!post.featuredImage.url) {
+    warnings.push("Featured image needs to be uploaded to Shopify before publishing");
   } else if (!post.featuredImage.alt.trim()) {
     warnings.push("Featured image alt text is recommended for accessibility");
   } else {

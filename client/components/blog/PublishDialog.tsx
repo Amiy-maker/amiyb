@@ -33,7 +33,7 @@ export function PublishDialog({
 
   const handlePublish = () => {
     // Generate HTML
-    const html = generateBlogHTML(post);
+    const html = generateBlogHTML(post, post.featuredImage.url);
     setHtmlOutput(html);
 
     // Generate FAQ Schema

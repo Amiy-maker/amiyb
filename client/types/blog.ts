@@ -1,6 +1,8 @@
 export interface ImageData {
   file: File | null;
   alt: string;
+  url?: string; // Shopify image URL after upload
+  isUploading?: boolean; // Track upload state
 }
 
 export interface BenefitItem {
