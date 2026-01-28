@@ -144,7 +144,7 @@ function generateHero(
   section: ParsedSection,
   imageUrls: Record<string, string>
 ): string {
-  const h1 = `<h1>${textWithLinksToHTML(content)}</h1>`;
+  const h1 = `<h1 style="font-size: 2.5em; font-weight: 700; margin-bottom: 30px; margin-top: 0; line-height: 1.2; color: #1a1a1a; letter-spacing: -0.5px;">${textWithLinksToHTML(content)}</h1>`;
 
   if (includeImages && rule.image?.position === "after" && section.images && section.images.length > 0) {
     const image = section.images[0];
@@ -152,7 +152,7 @@ function generateHero(
     console.log(`Available imageUrls keys: ${Object.keys(imageUrls).join(", ")}`);
     const imageUrl = imageUrls[image.keyword] || "/placeholder-featured.jpg";
     console.log(`Resolved image URL: ${imageUrl}`);
-    const imgTag = `<img src="${imageUrl}" alt="${image.keyword}" />`;
+    const imgTag = `<img src="${imageUrl}" alt="${image.keyword}" style="max-width: 100%; height: auto; display: block; margin: 40px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);" />`;
     return `${h1}\n${imgTag}`;
   }
 
