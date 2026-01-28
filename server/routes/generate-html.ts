@@ -33,6 +33,13 @@ export const handleGenerateHTML: RequestHandler = (req, res) => {
       console.log("Received imageUrls:", JSON.stringify(options.imageUrls, null, 2));
     }
 
+    // Log featured image URL
+    if (options.featuredImageUrl) {
+      console.log("Received featuredImageUrl:", options.featuredImageUrl);
+    } else {
+      console.log("No featuredImageUrl provided in options");
+    }
+
     // Verify that import dependencies are available
     if (typeof parseDocument !== "function") {
       console.error("CRITICAL: parseDocument is not a function. Import may have failed.");

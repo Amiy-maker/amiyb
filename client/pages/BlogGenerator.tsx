@@ -24,8 +24,10 @@ export default function BlogGenerator() {
   const [images, setImages] = useState<Array<{ keyword: string; sectionId: string }>>([]);
   const [uploadingImages, setUploadingImages] = useState<Record<string, boolean>>({});
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [featuredImage, setFeaturedImage] = useState<{ url: string; uploading: boolean } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const featuredImageInputRef = useRef<HTMLInputElement>(null);
   const imageFileInputsRef = useRef<Record<string, HTMLInputElement>>({});
 
   const sections = getSectionsByOrder();
@@ -55,10 +57,12 @@ export default function BlogGenerator() {
       let content: string;
 
       if (fileExtension === ".docx") {
-        // Parse DOCX file using mammoth
+        // Parse DOCX file using mammoth, preserving links
         const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        content = result.value;
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+
+        // Convert HTML to text while preserving links in markdown format
+        content = htmlToTextWithLinks(result.value);
 
         if (result.messages.length > 0) {
           console.warn("DOCX parsing warnings:", result.messages);
@@ -81,6 +85,143 @@ export default function BlogGenerator() {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  /**
+   * Convert HTML to plain text while preserving links in markdown format and proper spacing
+   */
+  const htmlToTextWithLinks = (html: string): string => {
+    // Create a temporary DOM element to parse HTML
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    const processNode = (node: Node, isInList: boolean = false): string => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || "";
+        return text;
+      }
+
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as Element;
+        const tagName = element.tagName.toLowerCase();
+
+        // Handle links: preserve as [text](url)
+        if (tagName === "a") {
+          const linkText = Array.from(element.childNodes)
+            .map(n => processNode(n, isInList))
+            .join("")
+            .trim();
+          const href = element.getAttribute("href") || "";
+          return href && linkText ? `[${linkText}](${href})` : linkText;
+        }
+
+        // Handle headings
+        if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(tagName)) {
+          const content = Array.from(element.childNodes)
+            .map(n => processNode(n, isInList))
+            .join("")
+            .trim();
+          return content ? content + "\n\n" : "";
+        }
+
+        // Handle unordered lists
+        if (tagName === "ul") {
+          const items = Array.from(element.childNodes)
+            .filter(node => node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName.toLowerCase() === "li")
+            .map(li => {
+              const text = Array.from((li as Element).childNodes)
+                .map(n => processNode(n, true))
+                .join("")
+                .trim();
+              return text ? "- " + text : "";
+            })
+            .filter(item => item.length > 0)
+            .join("\n");
+          return items ? items + "\n\n" : "";
+        }
+
+        // Handle ordered lists
+        if (tagName === "ol") {
+          const items = Array.from(element.childNodes)
+            .filter(node => node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName.toLowerCase() === "li")
+            .map((li, idx) => {
+              const text = Array.from((li as Element).childNodes)
+                .map(n => processNode(n, true))
+                .join("")
+                .trim();
+              return text ? `${idx + 1}. ${text}` : "";
+            })
+            .filter(item => item.length > 0)
+            .join("\n");
+          return items ? items + "\n\n" : "";
+        }
+
+        // Handle list items when inside lists
+        if (tagName === "li" && isInList) {
+          return Array.from(element.childNodes)
+            .map(n => processNode(n, true))
+            .join("")
+            .trim();
+        }
+
+        // Handle paragraphs and other block elements
+        if (["p", "div", "section", "article", "blockquote"].includes(tagName)) {
+          const content = Array.from(element.childNodes)
+            .map(n => processNode(n, isInList))
+            .join("")
+            .trim();
+          return content ? content + "\n\n" : "";
+        }
+
+        // Handle table
+        if (tagName === "table") {
+          const rows = Array.from(element.querySelectorAll("tr"))
+            .map(tr => {
+              const cells = Array.from(tr.querySelectorAll("td, th"))
+                .map(cell => Array.from(cell.childNodes)
+                  .map(n => processNode(n, isInList))
+                  .join("")
+                  .trim()
+                );
+              return cells.join(" | ");
+            })
+            .filter(row => row.length > 0);
+          return rows.join("\n") + "\n\n";
+        }
+
+        // For other elements, process children recursively
+        return Array.from(element.childNodes)
+          .map(n => processNode(n, isInList))
+          .join("");
+      }
+
+      return "";
+    };
+
+    let text = processNode(doc.body);
+
+    // Clean up excessive whitespace while preserving double newlines for spacing
+    const lines = text.split("\n");
+    const result: string[] = [];
+    let emptyCount = 0;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.length === 0) {
+        emptyCount++;
+        // Only keep up to 2 consecutive empty lines
+        if (emptyCount <= 2) {
+          result.push("");
+        }
+      } else {
+        emptyCount = 0;
+        result.push(trimmed);
+      }
+    }
+
+    return result
+      .join("\n")
+      .trim();
   };
 
   /**
@@ -170,6 +311,84 @@ export default function BlogGenerator() {
   };
 
   /**
+   * Upload featured/hero image to Shopify
+   */
+  const uploadFeaturedImageToShopify = async (file: File) => {
+    setFeaturedImage({ url: "", uploading: true });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("keyword", "featured-hero");
+
+      console.log("Uploading featured image:", file.name, file.type, file.size);
+
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const responseText = await response.text();
+      console.log("Upload response status:", response.status);
+      console.log("Upload response text:", responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        toast.error("Invalid response from server");
+        setFeaturedImage(null);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorMsg = data.error || "Unknown error";
+        console.error("Upload failed:", errorMsg);
+        toast.error(`Failed to upload featured image: ${errorMsg}`);
+        setFeaturedImage(null);
+        return;
+      }
+
+      if (!data.imageUrl) {
+        console.error("No imageUrl in response:", data);
+        toast.error("Image uploaded but URL not returned from server");
+        setFeaturedImage(null);
+        return;
+      }
+
+      console.log("Featured image uploaded successfully. URL:", data.imageUrl);
+      setFeaturedImage({ url: data.imageUrl, uploading: false });
+      toast.success("Featured image uploaded to Shopify!");
+    } catch (error) {
+      console.error("Error uploading featured image:", error);
+      toast.error(`Error uploading featured image: ${error instanceof Error ? error.message : String(error)}`);
+      setFeaturedImage(null);
+    }
+  };
+
+  /**
+   * Handle featured image file selection
+   */
+  const handleFeaturedImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    await uploadFeaturedImageToShopify(file);
+
+    // Reset input
+    if (featuredImageInputRef.current) {
+      featuredImageInputRef.current.value = "";
+    }
+  };
+
+  /**
+   * Remove featured image
+   */
+  const removeFeaturedImage = () => {
+    setFeaturedImage(null);
+    toast.success("Featured image removed");
+  };
+
+  /**
    * Generate HTML from document
    */
   const generateBlogHTML = async () => {
@@ -187,6 +406,7 @@ export default function BlogGenerator() {
           includeSchema: true,
           includeImages: true,
           imageUrls: Object.keys(imageUrls).length > 0 ? imageUrls : undefined,
+          featuredImageUrl: featuredImage?.url,
         },
       };
 
@@ -305,6 +525,7 @@ export default function BlogGenerator() {
             : undefined,
           publicationDate: publishData.publicationDate,
           imageUrls: Object.keys(imageUrls).length > 0 ? imageUrls : undefined,
+          featuredImageUrl: featuredImage?.url,
         }),
       });
 
@@ -379,6 +600,85 @@ export default function BlogGenerator() {
                 <p className="text-xs text-gray-500 mt-3">
                   Supports: .txt, .md, .docx
                 </p>
+              </CardContent>
+            </Card>
+
+            {/* Featured Image Card */}
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="text-lg">Featured Image</CardTitle>
+                <CardDescription>Hero/banner image for blog</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {featuredImage && (featuredImage.url || featuredImage.uploading) ? (
+                  <div className="space-y-3">
+                    <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                      {featuredImage.uploading ? (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600">Uploading...</p>
+                          </div>
+                        </div>
+                      ) : featuredImage.url ? (
+                        <img
+                          src={featuredImage.url}
+                          alt="Featured"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error("Failed to load featured image:", featuredImage.url);
+                            toast.error("Failed to load featured image from Shopify");
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <p className="text-sm text-gray-500">No image URL returned</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => featuredImageInputRef.current?.click()}
+                        disabled={featuredImage.uploading}
+                        className="flex-1 gap-2"
+                      >
+                        <Edit2 size={14} />
+                        {featuredImage.uploading ? "Uploading..." : "Change"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={removeFeaturedImage}
+                        className="flex-1 gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 size={14} />
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      ref={featuredImageInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={handleFeaturedImageSelect}
+                      className="hidden"
+                    />
+                    <Button
+                      onClick={() => featuredImageInputRef.current?.click()}
+                      variant="outline"
+                      className="w-full gap-2"
+                    >
+                      <Upload size={16} />
+                      Upload Image
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-3">
+                      Supports: JPG, PNG, WebP, GIF
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

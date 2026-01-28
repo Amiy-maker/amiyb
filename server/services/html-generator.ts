@@ -19,6 +19,7 @@ export interface HTMLGeneratorOptions {
   blogDate?: string;
   authorName?: string;
   imageUrls?: Record<string, string>; // Maps image keyword to Shopify URL
+  featuredImageUrl?: string; // Featured/hero image URL
 }
 
 /**
@@ -35,6 +36,7 @@ export function generateHTML(
     blogDate,
     authorName,
     imageUrls = {},
+    featuredImageUrl,
   } = options;
 
   const sections: string[] = [];
@@ -44,6 +46,15 @@ export function generateHTML(
     const schema = generateArticleSchema(blogTitle, blogDate, authorName);
     console.log("Generated schema markup:", schema.length, "characters");
     sections.push(schema);
+  }
+
+  // Add featured image if provided
+  if (includeImages && featuredImageUrl) {
+    console.log("Adding featured image to HTML:", featuredImageUrl);
+    const featuredImageHtml = `<img src="${featuredImageUrl}" alt="Featured" class="featured-image" />`;
+    sections.push(featuredImageHtml);
+  } else {
+    console.log("Featured image not included. includeImages:", includeImages, "featuredImageUrl:", featuredImageUrl);
   }
 
   // Generate HTML for each section
@@ -85,7 +96,7 @@ function generateSectionHTML(
       return generateHero(rawContent, rule, includeImages, section, imageUrls);
 
     case "section2":
-      return `<p>${escapeHTML(rawContent)}</p>`;
+      return `<p>${textWithLinksToHTML(rawContent)}</p>`;
 
     case "section3":
       return generateList(lines, "ul", "Table of Contents");
@@ -97,13 +108,13 @@ function generateSectionHTML(
       return generateSectionBody(rawContent, includeImages, section, imageUrls);
 
     case "section6":
-      return `<blockquote>${escapeHTML(rawContent)}</blockquote>`;
+      return `<blockquote>${textWithLinksToHTML(rawContent)}</blockquote>`;
 
     case "section7":
       return generateComparisonTable(lines);
 
     case "section8":
-      return `<blockquote>${escapeHTML(rawContent)}</blockquote>`;
+      return `<blockquote>${textWithLinksToHTML(rawContent)}</blockquote>`;
 
     case "section9":
       return generateList(lines, "ol", "Steps");
@@ -115,7 +126,7 @@ function generateSectionHTML(
       return generateFAQSection(lines);
 
     case "section12":
-      return `<p>${escapeHTML(rawContent)}</p>`;
+      return `<p>${textWithLinksToHTML(rawContent)}</p>`;
 
     default:
       console.warn(`Unknown section ID: ${id}. Valid sections are section1-section12.`);
@@ -133,7 +144,7 @@ function generateHero(
   section: ParsedSection,
   imageUrls: Record<string, string>
 ): string {
-  const h1 = `<h1>${escapeHTML(content)}</h1>`;
+  const h1 = `<h1>${textWithLinksToHTML(content)}</h1>`;
 
   if (includeImages && rule.image?.position === "after" && section.images && section.images.length > 0) {
     const image = section.images[0];
@@ -157,7 +168,7 @@ function generateList(
   title?: string
 ): string {
   const tag = listType === "ul" ? "ul" : "ol";
-  const items = lines.map((line) => `<li>${escapeHTML(line)}</li>`).join("\n");
+  const items = lines.map((line) => `<li>${textWithLinksToHTML(line)}</li>`).join("\n");
 
   let html = `<${tag}>\n${items}\n</${tag}>`;
 
@@ -193,14 +204,14 @@ function generateSectionBody(
         lines[0].length < 60 &&
         (lines[0].endsWith(":") || lines[0] === lines[0].toUpperCase())
       ) {
-        result += `<h2>${escapeHTML(lines[0])}</h2>\n`;
+        result += `<h2>${textWithLinksToHTML(lines[0])}</h2>\n`;
         lines.shift();
       }
 
       // Rest of content
       const bodyText = lines.join("\n").trim();
       if (bodyText) {
-        result += `<p>${escapeHTML(bodyText)}</p>`;
+        result += `<p>${textWithLinksToHTML(bodyText)}</p>`;
       }
 
       // Add image if enabled and available
@@ -237,7 +248,7 @@ function generateComparisonTable(lines: string[]): string {
   // Header row
   html += "<thead><tr>";
   for (const header of headers) {
-    html += `<th>${escapeHTML(header)}</th>`;
+    html += `<th>${textWithLinksToHTML(header)}</th>`;
   }
   html += "</tr></thead>\n";
 
@@ -246,7 +257,7 @@ function generateComparisonTable(lines: string[]): string {
   for (const row of rows) {
     html += "<tr>";
     for (const cell of row) {
-      html += `<td>${escapeHTML(cell)}</td>`;
+      html += `<td>${textWithLinksToHTML(cell)}</td>`;
     }
     html += "</tr>";
   }
@@ -294,8 +305,8 @@ function generateFAQSection(lines: string[]): string {
   for (const faq of faqs) {
     html += `
 <details>
-  <summary>${escapeHTML(faq.question)}</summary>
-  <p>${escapeHTML(faq.answer)}</p>
+  <summary>${textWithLinksToHTML(faq.question)}</summary>
+  <p>${textWithLinksToHTML(faq.answer)}</p>
 </details>
 `;
   }
@@ -365,6 +376,54 @@ function escapeHTML(text: string): string {
 }
 
 /**
+ * Convert text with markdown links to HTML
+ * Handles format: [link text](url)
+ */
+function textWithLinksToHTML(text: string): string {
+  // First, escape HTML special characters except for brackets and parentheses we'll use for links
+  let escaped = text.replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+  // Then convert markdown links to HTML links: [text](url) -> <a href="url">text</a>
+  escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+    // Validate URL to prevent XSS
+    if (isValidURL(url)) {
+      return `<a href="${escapeHTML(url)}">${linkText}</a>`;
+    }
+    return match; // Return original if URL is invalid
+  });
+
+  return escaped;
+}
+
+/**
+ * Check if a URL is valid and safe
+ */
+function isValidURL(url: string): boolean {
+  // Reject dangerous protocols
+  if (url.startsWith("javascript:") || url.startsWith("data:") || url.startsWith("vbscript:")) {
+    return false;
+  }
+
+  // Allow http, https, mailto, and relative URLs
+  if (url.startsWith("http://") || url.startsWith("https://") ||
+      url.startsWith("mailto:") || url.startsWith("/") ||
+      url.startsWith("#") || url.startsWith("?")) {
+    return true;
+  }
+
+  // Allow relative URLs (no protocol)
+  if (!url.includes("://")) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Get the CSS styles used for blog posts - scoped to .blog-content wrapper
  */
 function getBlogStyles(): string {
@@ -431,6 +490,18 @@ function getBlogStyles(): string {
       margin: 40px auto;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Featured image */
+    .blog-content img.featured-image {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      margin: 0 0 40px 0;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     }
 
     /* Lists */
