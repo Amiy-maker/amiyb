@@ -32,7 +32,8 @@ export function RelatedProductsField({
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch("/api/products");
+        // Fetch more products to ensure we get all or most products from the store
+        const response = await fetch("/api/products?limit=250");
 
         if (!response.ok) {
           const errorText = await response.text();
