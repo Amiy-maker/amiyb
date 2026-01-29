@@ -232,7 +232,7 @@ function generateSectionBody(
         // Only include image if URL is available (don't use placeholders)
         if (imageUrl) {
           console.log(`Resolved image URL for section: ${imageUrl}`);
-          result += `\n<img src="${imageUrl}" alt="${image.keyword}" style="width: 100%; height: auto; display: block; margin: 30px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);" />`;
+          result += `\n<img src="${imageUrl}" alt="${image.keyword}" style="width: 100%; max-width: 850px; height: auto; display: block; margin: 30px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); object-fit: contain; background-color: #f5f5f5;" />`;
         } else {
           console.log(`Image URL not available for keyword: ${image.keyword}`);
         }
