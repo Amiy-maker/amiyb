@@ -93,10 +93,25 @@ export class ShopifyClient {
       // Ensure the URL is properly formatted for Shopify
       const imageUrl = article.image.src;
 
-      // Validate URL format
+      // Validate URL format - must be absolute HTTP/HTTPS URL
       if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
         console.error('Invalid featured image URL format:', imageUrl);
-        throw new Error(`Featured image URL must be absolute (http/https): ${imageUrl}`);
+        throw new Error(
+          `Featured image URL must be an absolute HTTP/HTTPS URL. ` +
+          `Received: ${imageUrl}. ` +
+          `Please ensure the image was successfully uploaded to Shopify.`
+        );
+      }
+
+      // Additional validation: try to parse as URL
+      try {
+        new URL(imageUrl);
+      } catch (urlError) {
+        console.error('Featured image URL parse error:', urlError);
+        throw new Error(
+          `Featured image URL is malformed: ${imageUrl}. ` +
+          `Please ensure you're using a valid Shopify image URL.`
+        );
       }
 
       articleData.image = {
