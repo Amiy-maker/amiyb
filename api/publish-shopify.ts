@@ -3,6 +3,13 @@ import { parseDocument } from './lib/document-parser.js';
 import { generateStyledHTML } from './lib/html-generator.js';
 import { getShopifyClient } from './lib/shopify-client.js';
 
+interface RelatedProduct {
+  id: string;
+  title: string;
+  handle: string;
+  image?: string;
+}
+
 export interface PublishShopifyRequest {
   document: string;
   title: string;
@@ -11,6 +18,7 @@ export interface PublishShopifyRequest {
   publicationDate?: string;
   imageUrls?: Record<string, string>; // Maps image keyword to Shopify URL
   featuredImageUrl?: string; // Featured/hero image URL
+  relatedProducts?: RelatedProduct[]; // Related products to save to metafield
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
