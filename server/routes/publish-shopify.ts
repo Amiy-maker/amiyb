@@ -23,9 +23,22 @@ export interface PublishShopifyRequest {
 
 export const handlePublishShopify: RequestHandler = async (req, res) => {
   try {
+    console.log("=== POST /api/publish-shopify request received ===");
+    console.log("Request body keys:", Object.keys(req.body).join(", "));
+
     const { document, title, author, tags, publicationDate, imageUrls, featuredImageUrl, relatedProducts } = req.body as PublishShopifyRequest;
 
+    console.log("Publish parameters:");
+    console.log("  - Title:", title);
+    console.log("  - Document length:", document?.length);
+    console.log("  - Author:", author || "Not provided");
+    console.log("  - Tags:", tags?.length || 0);
+    console.log("  - Featured image URL:", featuredImageUrl ? "Present" : "Not provided");
+    console.log("  - Image URLs count:", Object.keys(imageUrls || {}).length);
+    console.log("  - Related products:", relatedProducts?.length || 0);
+
     if (!document || !title) {
+      console.error("Missing required fields");
       return res.status(400).json({
         error: "Missing required fields: 'document' and 'title'",
       });
@@ -85,15 +98,36 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
     // Generate styled HTML for Shopify
     // Important: DO NOT include featured image in body HTML - it will be set as the article image field
     // This ensures the featured image appears in Shopify's "Image" field, not in the content
-    const bodyHtml = generateStyledHTML(parsed, {
-      includeSchema: true,
-      includeImages: true,
-      blogTitle: title,
-      authorName: author,
-      imageUrls: imageUrls || {},
-      // CRITICAL: Don't pass featuredImageUrl here - we set it separately as article.image
-      featuredImageUrl: undefined,
-    });
+    let bodyHtml: string;
+    try {
+      console.log("Generating styled HTML...");
+      bodyHtml = generateStyledHTML(parsed, {
+        includeSchema: true,
+        includeImages: true,
+        blogTitle: title,
+        authorName: author,
+        imageUrls: imageUrls || {},
+        // CRITICAL: Don't pass featuredImageUrl here - we set it separately as article.image
+        featuredImageUrl: undefined,
+      });
+
+      if (!bodyHtml || bodyHtml.trim().length === 0) {
+        console.error("CRITICAL: Generated HTML is empty");
+        return res.status(500).json({
+          error: "HTML generation failed",
+          details: "The generated HTML is empty. Please check your document content.",
+        });
+      }
+
+      console.log("HTML generated successfully. Size:", bodyHtml.length, "characters");
+    } catch (htmlError) {
+      const htmlErrorMsg = htmlError instanceof Error ? htmlError.message : String(htmlError);
+      console.error("Error generating HTML:", htmlErrorMsg);
+      return res.status(500).json({
+        error: "Failed to generate HTML from document",
+        details: htmlErrorMsg,
+      });
+    }
 
     console.log("Publishing with featured image URL:", featuredImageUrl);
     console.log("Body HTML length:", bodyHtml.length);
@@ -143,9 +177,13 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
     console.log("Featured image URL for publication:", featuredImageUrl ? 'present' : 'missing');
     console.log("Blog ID:", blogId);
     console.log("Article title:", title);
+    console.log("Article tags:", tags?.length || 0);
+    console.log("Article author:", author || "Blog Generator (default)");
+    console.log("Body HTML size:", bodyHtml.length, "bytes");
 
     let articleId: string;
     try {
+      console.log("Sending article to Shopify REST API...");
       articleId = await shopifyClient.publishArticle(blogId, {
         title,
         bodyHtml,
@@ -154,10 +192,11 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
         tags: tags || [],
         image: featuredImageUrl ? { src: featuredImageUrl } : undefined,
       });
-      console.log("Article published successfully. Article ID:", articleId);
+      console.log("✓ Article published successfully. Article ID:", articleId);
     } catch (publishError) {
       const publishErrorMsg = publishError instanceof Error ? publishError.message : String(publishError);
-      console.error("Article publication failed:", publishErrorMsg);
+      console.error("✗ Article publication failed:", publishErrorMsg);
+      console.error("Error details:", publishError);
       throw publishError;
     }
 
@@ -173,6 +212,7 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
             image: p.image,
           }))
         );
+        console.log("Metafield value size:", relatedProductsValue.length, "bytes");
         await shopifyClient.updateArticleMetafield(
           blogId,
           articleId,
@@ -181,14 +221,19 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
           relatedProductsValue,
           "json"
         );
-        console.log("Related products metafield updated successfully");
+        console.log("✓ Related products metafield updated successfully");
       } catch (error) {
-        console.error("Error saving related products to metafield:", error);
+        const metafieldErrorMsg = error instanceof Error ? error.message : String(error);
+        console.error("✗ Error saving related products to metafield:", metafieldErrorMsg);
+        console.error("Note: Article is already published. Metafield update is optional.");
         // Don't fail the entire publish if metafield update fails
         // The article is already published
       }
+    } else {
+      console.log("No related products provided - skipping metafield update");
     }
 
+    console.log("=== Publication complete ===");
     res.json({
       success: true,
       message: "Article published to Shopify successfully",
@@ -198,16 +243,18 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
       relatedProductsCount: relatedProducts?.length || 0,
     });
   } catch (error) {
-    console.error("Error publishing to Shopify:", error);
-    console.error("Full error stack:", error instanceof Error ? error.stack : "N/A");
-
     const errorMessage = error instanceof Error ? error.message : String(error);
-    const isFeaturedImageError = errorMessage.includes('image') || errorMessage.includes('Image');
-    const isAuthError = errorMessage.includes('Authentication failed') || errorMessage.includes('401');
-    const isConnectionError = errorMessage.includes('Cannot connect') || errorMessage.includes('Failed to connect');
+    console.error("=== Publication failed ===");
+    console.error("Error message:", errorMessage);
+    console.error("Full error:", error);
+    console.error("Error stack:", error instanceof Error ? error.stack : "N/A");
+
+    const isFeaturedImageError = errorMessage.toLowerCase().includes('image') || errorMessage.toLowerCase().includes('url');
+    const isAuthError = errorMessage.includes('Authentication failed') || errorMessage.includes('401') || errorMessage.includes('Access token');
+    const isConnectionError = errorMessage.includes('Cannot connect') || errorMessage.includes('Failed to connect') || errorMessage.includes('ENOTFOUND');
 
     if (isAuthError) {
-      console.error("Authentication error detected:", errorMessage);
+      console.error("✗ Authentication error detected");
       return res.status(401).json({
         error: "Shopify authentication failed",
         details: "Your Shopify API access token may be invalid or expired.",
@@ -216,27 +263,27 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
     }
 
     if (isConnectionError) {
-      console.error("Connection error detected:", errorMessage);
+      console.error("✗ Connection error detected");
       return res.status(503).json({
-        error: "Unable to validate Shopify connection",
+        error: "Unable to connect to Shopify",
         details: errorMessage,
-        suggestion: "Please verify your Shopify credentials and network connectivity.",
+        suggestion: "Please verify your Shopify shop name is correct and check your network connectivity.",
       });
     }
 
     if (isFeaturedImageError) {
-      console.error("Featured image error detected:", errorMessage);
+      console.error("✗ Featured image error detected");
       return res.status(400).json({
         error: "Failed to set featured image on article",
         details: errorMessage,
-        suggestion: "Ensure the featured image URL is valid and publicly accessible",
+        suggestion: "Ensure the featured image URL is valid, publicly accessible, and properly formatted",
       });
     }
 
     res.status(500).json({
       error: "Failed to publish to Shopify",
       details: errorMessage,
-      suggestion: "Please check the server logs for more details and verify your Shopify configuration.",
+      suggestion: "Please check the server logs for more details. This could be a Shopify API issue, authentication issue, or document content issue.",
     });
   }
 };

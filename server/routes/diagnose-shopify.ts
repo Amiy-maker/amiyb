@@ -41,12 +41,15 @@ export const handleDiagnoseShopify: RequestHandler = async (_req, res) => {
       try {
         console.log(`[Diagnose] Attempting connection to ${shopName}`);
         const baseUrl = `https://${shopName}/admin/api/${apiVersion}`;
-        
+        console.log(`[Diagnose] Full URL: ${baseUrl}/shop.json`);
+
         const response = await fetch(`${baseUrl}/shop.json`, {
           headers: {
             "X-Shopify-Access-Token": accessToken,
           },
         });
+
+        console.log(`[Diagnose] Response status: ${response.status}`);
 
         if (response.ok) {
           const data = await response.json();
@@ -56,7 +59,11 @@ export const handleDiagnoseShopify: RequestHandler = async (_req, res) => {
             url: `${baseUrl}/shop.json`,
             responseStatus: response.status,
           };
+          console.log(`[Diagnose] Successfully connected to shop: ${data.shop?.name}`);
         } else {
+          const responseBody = await response.text();
+          console.error(`[Diagnose] Connection failed. Status: ${response.status}, Body: ${responseBody}`);
+
           diagnostics.connection = {
             status: "✗ Connection Failed",
             url: `${baseUrl}/shop.json`,
@@ -68,16 +75,22 @@ export const handleDiagnoseShopify: RequestHandler = async (_req, res) => {
             diagnostics.issues.push("HTTP 401: Access token is invalid or expired. Please regenerate your Shopify API token.");
           } else if (response.status === 404) {
             diagnostics.issues.push(`HTTP 404: Shop not found. Please verify that SHOPIFY_SHOP="${shopName}" is correct.`);
+          } else if (response.status === 429) {
+            diagnostics.issues.push("HTTP 429: Rate limited by Shopify. Please try again later.");
+          } else if (response.status >= 500) {
+            diagnostics.issues.push(`HTTP ${response.status}: Shopify server error. Please try again later.`);
           } else {
             diagnostics.issues.push(`HTTP ${response.status}: ${response.statusText}`);
           }
         }
       } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error(`[Diagnose] Network/fetch error: ${errorMsg}`);
         diagnostics.connection = {
           status: "✗ Connection Error",
-          error: error instanceof Error ? error.message : String(error),
+          error: errorMsg,
         };
-        diagnostics.issues.push(`Network error: ${error instanceof Error ? error.message : "Unknown error"}`);
+        diagnostics.issues.push(`Network error: ${errorMsg}`);
       }
     }
 
