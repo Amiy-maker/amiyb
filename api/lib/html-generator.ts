@@ -212,14 +212,14 @@ function generateSectionBody(
         lines[0].length < 60 &&
         (lines[0].endsWith(":") || lines[0] === lines[0].toUpperCase())
       ) {
-        result += `<h2>${escapeHTML(lines[0])}</h2>\n`;
+        result += `<h2 style="font-size: 1.8em; font-weight: 600; margin-top: 25px; margin-bottom: 15px; line-height: 1.3; color: #1a1a1a; border-bottom: 3px solid #e8e8e8; padding-bottom: 12px;">${textWithLinksToHTML(lines[0])}</h2>\n`;
         lines.shift();
       }
 
       // Rest of content
       const bodyText = lines.join("\n").trim();
       if (bodyText) {
-        result += `<p>${escapeHTML(bodyText)}</p>`;
+        result += `<p style="font-size: 1.05em; line-height: 1.8; margin-bottom: 15px; margin-top: 0; color: #3a3a3a;">${textWithLinksToHTML(bodyText)}</p>`;
       }
 
       // Add image if enabled and available
@@ -231,7 +231,7 @@ function generateSectionBody(
         // Only include image if URL is available (don't use placeholders)
         if (imageUrl) {
           console.log(`Resolved image URL for section: ${imageUrl}`);
-          result += `\n<img src="${imageUrl}" alt="${image.keyword}" style="width: 100%; height: auto; margin: 30px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);" />`;
+          result += `\n<img src="${imageUrl}" alt="${image.keyword}" style="width: 100%; height: auto; display: block; margin: 30px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);" />`;
         } else {
           console.log(`Image URL not available for keyword: ${image.keyword}`);
         }
