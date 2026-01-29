@@ -573,6 +573,9 @@ export class ShopifyClient {
       this.validateCredentials();
 
       const restUrl = `${this.baseUrl}/shop.json`;
+      console.log(`Validating Shopify connection. URL: ${restUrl}`);
+      console.log(`Shop name: ${this.shopName}`);
+      console.log(`API version: ${this.apiVersion}`);
 
       const response = await fetch(restUrl, {
         headers: {
@@ -580,9 +583,30 @@ export class ShopifyClient {
         },
       });
 
-      return response.ok;
-    } catch {
-      return false;
+      console.log(`Shopify shop.json response status: ${response.status}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Shopify API error (${response.status}): ${errorText}`);
+
+        if (response.status === 401) {
+          throw new Error("Authentication failed - Invalid or expired access token. Please regenerate your Shopify API access token.");
+        } else if (response.status === 404) {
+          throw new Error("Shop not found - Please check that SHOPIFY_SHOP is correctly formatted (e.g., myshop.myshopify.com).");
+        } else if (response.status >= 400 && response.status < 500) {
+          throw new Error(`Client error: ${response.statusText}. Please verify your Shopify credentials.`);
+        } else {
+          throw new Error(`Shopify API error: ${response.status} ${response.statusText}`);
+        }
+      }
+
+      const data = await response.json();
+      console.log(`Successfully connected to Shopify shop: ${data.shop?.name}`);
+      return true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Shopify connection validation error:", errorMessage);
+      throw new Error(errorMessage);
     }
   }
 }
