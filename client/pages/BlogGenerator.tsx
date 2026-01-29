@@ -690,7 +690,10 @@ Timestamp: ${data.timestamp}
 
     setIsPublishing(true);
     try {
-      console.log("Publishing article with featured image URL:", featuredImage?.url);
+      console.log("Starting publish process...");
+      console.log("Title:", publishData.title);
+      console.log("Featured image URL:", featuredImage?.url || "None");
+      console.log("Document content length:", documentContent.length);
 
       const response = await fetch("/api/publish-shopify", {
         method: "POST",
@@ -709,7 +712,20 @@ Timestamp: ${data.timestamp}
         }),
       });
 
-      const data = await response.json();
+      console.log("Publish response status:", response.status);
+
+      // Parse response body safely
+      let data: any;
+      const contentType = response.headers.get("content-type");
+
+      if (contentType?.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const textContent = await response.text();
+        console.error("Server returned non-JSON response:", contentType, textContent);
+        toast.error("Server error: Invalid response format. Check browser console for details.");
+        return;
+      }
 
       // Check if images need to be uploaded first
       if (response.status === 202 && data.requiresImageUpload) {
@@ -722,14 +738,26 @@ Timestamp: ${data.timestamp}
 
       if (!response.ok) {
         const errorMessage = data.error || "Failed to publish to Shopify";
+        const details = data.details ? ` (${data.details})` : "";
         const suggestion = data.suggestion ? ` ${data.suggestion}` : "";
-        console.error("Publish error response:", data);
+        const fullError = `${errorMessage}${details}${suggestion}`;
+
+        console.error("Publish error response:", {
+          status: response.status,
+          error: data.error,
+          details: data.details,
+          suggestion: data.suggestion,
+        });
 
         // Special handling for featured image errors
         if (data.error?.includes("featured image") || data.error?.includes("image")) {
-          toast.error(`Featured Image Error: ${errorMessage}${suggestion}`);
+          toast.error(`Featured Image Error: ${fullError}`);
+        } else if (response.status === 401) {
+          toast.error(`Authentication Error: ${fullError}`);
+        } else if (response.status === 503) {
+          toast.error(`Connection Error: ${fullError}`);
         } else {
-          toast.error(errorMessage);
+          toast.error(fullError);
         }
         return;
       }
@@ -738,6 +766,9 @@ Timestamp: ${data.timestamp}
       if (featuredImage?.url && !data.featuredImageIncluded) {
         console.warn("Featured image URL was provided but may not have been included in the published article");
       }
+
+      console.log("Article published successfully. Article ID:", data.articleId);
+      console.log("Related products saved:", data.relatedProductsCount || 0);
 
       toast.success("Published to Shopify successfully!");
       setShowPublishModal(false);
@@ -748,8 +779,10 @@ Timestamp: ${data.timestamp}
         publicationDate: new Date().toISOString().split("T")[0],
       });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Error publishing:", error);
-      toast.error(`Error: ${error instanceof Error ? error.message : "Failed to publish to Shopify"}`);
+      console.error("Error stack:", error instanceof Error ? error.stack : "N/A");
+      toast.error(`Error: ${errorMessage}`);
     } finally {
       setIsPublishing(false);
     }
