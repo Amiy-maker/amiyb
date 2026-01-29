@@ -40,7 +40,19 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
         console.error(`Invalid featured image URL format: ${featuredImageUrl}`);
         return res.status(400).json({
           error: "Invalid featured image URL",
-          details: "Featured image URL must be a full HTTP/HTTPS URL",
+          details: "Featured image URL must be a full HTTP/HTTPS URL. Ensure the image was successfully uploaded to Shopify before publishing.",
+          suggestion: "Please re-upload the featured image and try again.",
+        });
+      }
+
+      // Validate URL is properly formatted (not just protocol)
+      try {
+        new URL(featuredImageUrl);
+      } catch {
+        console.error(`Malformed featured image URL: ${featuredImageUrl}`);
+        return res.status(400).json({
+          error: "Invalid featured image URL format",
+          details: "The featured image URL is malformed. Please re-upload the image.",
         });
       }
     } else {
