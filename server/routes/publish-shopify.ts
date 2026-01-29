@@ -23,7 +23,7 @@ export interface PublishShopifyRequest {
 
 export const handlePublishShopify: RequestHandler = async (req, res) => {
   try {
-    const { document, title, author, tags, publicationDate, imageUrls, featuredImageUrl } = req.body as PublishShopifyRequest;
+    const { document, title, author, tags, publicationDate, imageUrls, featuredImageUrl, relatedProducts } = req.body as PublishShopifyRequest;
 
     if (!document || !title) {
       return res.status(400).json({
