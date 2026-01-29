@@ -352,15 +352,19 @@ function generateFAQSection(lines: string[]): string {
     return "<p style=\"font-size: 1.05em; line-height: 1.8; margin-bottom: 15px; margin-top: 0; color: #3a3a3a;\">No FAQs provided</p>";
   }
 
-  let html = '<h2 style="font-size: 1.8em; font-weight: 600; margin-top: 45px; margin-bottom: 25px; line-height: 1.3; color: #1a1a1a; border-bottom: 3px solid #e8e8e8; padding-bottom: 12px;">Frequently Asked Questions</h2>\n';
+  let html = '<h2 style="font-size: 1.8em; font-weight: 600; margin-top: 45px; margin-bottom: 25px; line-height: 1.3; color: #4d4f2f; border-bottom: 3px solid #e8e8e8; padding-bottom: 12px;">Frequently Asked Questions</h2>\n';
   html += '<div style="margin: 20px 0;">\n';
 
   for (const faq of faqs) {
     html += `
-<div style="margin-bottom: 25px; padding: 20px; border: 1px solid #d0d0d0; border-radius: 6px; background-color: #f9f9f9;">
-  <p style="margin: 0 0 12px 0; font-weight: 700; font-size: 1.05em; color: #1a1a1a; line-height: 1.6;"><strong>Q: ${textWithLinksToHTML(faq.question)}</strong></p>
-  <p style="margin: 0; font-size: 1em; color: #3a3a3a; line-height: 1.8;">A: ${textWithLinksToHTML(faq.answer)}</p>
-</div>
+<details style="margin-bottom: 15px; border: 1px solid #d0d0d0; border-radius: 6px; overflow: hidden;">
+  <summary style="padding: 18px 20px; background-color: #f9f9f9; cursor: pointer; font-weight: 600; font-size: 1.05em; color: #4d4f2f; user-select: none; display: flex; align-items: center; transition: background-color 0.2s ease;">
+    ${textWithLinksToHTML(faq.question)}
+  </summary>
+  <div style="padding: 18px 20px; border-top: 1px solid #e0e0e0; background-color: #ffffff; color: #3a3a3a; font-size: 1em; line-height: 1.8;">
+    ${textWithLinksToHTML(faq.answer)}
+  </div>
+</details>
 `;
   }
 
