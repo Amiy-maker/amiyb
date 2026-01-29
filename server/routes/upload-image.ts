@@ -20,8 +20,11 @@ export interface UploadImageResponse {
  */
 export const handleUploadImage: RequestHandler = async (req, res) => {
   try {
+    console.log("=== POST /api/upload-image request received ===");
+
     // Check if file was uploaded
     if (!req.file) {
+      console.error("No file provided in request");
       return res.status(400).json({
         success: false,
         error: "No file provided. Please upload an image file.",
@@ -29,10 +32,16 @@ export const handleUploadImage: RequestHandler = async (req, res) => {
     }
 
     const keyword = (req.body?.keyword || "image").trim();
+    console.log("File upload details:");
+    console.log("  - Keyword:", keyword);
+    console.log("  - Original filename:", req.file.originalname);
+    console.log("  - MIME type:", req.file.mimetype);
+    console.log("  - File size:", req.file.size, "bytes");
 
     // Validate file is an image
     const allowedMimes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!allowedMimes.includes(req.file.mimetype)) {
+      console.error("Invalid MIME type:", req.file.mimetype);
       return res.status(400).json({
         success: false,
         error: "Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.",
@@ -40,21 +49,24 @@ export const handleUploadImage: RequestHandler = async (req, res) => {
     }
 
     // Validate file size (max 5MB)
-    if (req.file.size > 5 * 1024 * 1024) {
+    const maxSize = 5 * 1024 * 1024;
+    if (req.file.size > maxSize) {
+      console.error("File too large:", req.file.size, "bytes");
       return res.status(400).json({
         success: false,
-        error: "File too large. Maximum size is 5MB.",
+        error: `File too large (${Math.round(req.file.size / 1024 / 1024)}MB). Maximum size is 5MB.`,
       } as UploadImageResponse);
     }
 
     // Generate filename using keyword
     const ext = req.file.originalname.split(".").pop() || "jpg";
     const filename = `${keyword.replace(/\s+/g, "-")}-${Date.now()}.${ext}`;
+    console.log("Generated filename:", filename);
 
     // Upload to Shopify
     try {
       const shopifyClient = getShopifyClient();
-      console.log(`Uploading image: ${filename} with keyword: ${keyword}`);
+      console.log(`Starting Shopify image upload...`);
       const imageUrl = await shopifyClient.uploadImage(req.file.buffer, filename, keyword);
 
       console.log(`Successfully uploaded image. URL: ${imageUrl}`);
@@ -64,20 +76,23 @@ export const handleUploadImage: RequestHandler = async (req, res) => {
         keyword,
       } as UploadImageResponse);
     } catch (shopifyError) {
-      console.error("Shopify upload error:", shopifyError);
+      const shopifyErrorMsg = shopifyError instanceof Error ? shopifyError.message : String(shopifyError);
+      console.error("Shopify upload error:", shopifyErrorMsg);
+      console.error("Shopify error details:", shopifyError);
+
       return res.status(500).json({
         success: false,
-        error:
-          shopifyError instanceof Error
-            ? shopifyError.message
-            : "Failed to upload image to Shopify",
+        error: `Failed to upload image to Shopify: ${shopifyErrorMsg}`,
       } as UploadImageResponse);
     }
   } catch (error) {
-    console.error("Image upload error:", error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error("Image upload error:", errorMsg);
+    console.error("Error stack:", error instanceof Error ? error.stack : "N/A");
+
     return res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : "Unexpected server error",
+      error: `Unexpected server error: ${errorMsg}`,
     } as UploadImageResponse);
   }
 };
