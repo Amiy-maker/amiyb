@@ -72,13 +72,17 @@ export function RelatedProductsField({
     const isSelected = selectedProducts.some((p) => p.id === product.id);
     if (isSelected) return false;
 
-    // Filter by search term
-    if (!searchTerm.trim()) return false;
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      product.title.toLowerCase().includes(searchLower) ||
-      product.handle.toLowerCase().includes(searchLower)
-    );
+    // Filter by search term (if provided)
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        product.title.toLowerCase().includes(searchLower) ||
+        product.handle.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // If no search term, show all products
+    return true;
   });
 
   const handleAddProduct = (product: Product) => {
