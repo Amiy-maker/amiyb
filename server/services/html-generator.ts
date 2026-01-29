@@ -263,7 +263,7 @@ function generateComparisonTable(lines: string[]): string {
   // Header row
   html += '<thead style="background: linear-gradient(135deg, #f5f5f5 0%, #ebebeb 100%);"><tr>';
   for (const header of headers) {
-    html += `<th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #4d4f2f; border-bottom: 2px solid #d0d0d0; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.5px;">${textWithLinksToHTML(header)}</th>`;
+    html += `<th style="padding: 15px 18px; text-align: left; font-weight: 600; color: #424423; border-bottom: 2px solid #d0d0d0; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.5px;">${textWithLinksToHTML(header)}</th>`;
   }
   html += "</tr></thead>\n";
 
@@ -272,7 +272,7 @@ function generateComparisonTable(lines: string[]): string {
   for (const row of rows) {
     html += "<tr>";
     for (const cell of row) {
-      html += `<td style="padding: 12px 15px; border-bottom: 1px solid #e8e8e8; color: #3a3a3a;">${textWithLinksToHTML(cell)}</td>`;
+      html += `<td style="padding: 15px 18px; border-bottom: 1px solid #e8e8e8; color: #3a3a3a;">${textWithLinksToHTML(cell)}</td>`;
     }
     html += "</tr>";
   }
@@ -352,16 +352,16 @@ function generateFAQSection(lines: string[]): string {
     return "<p style=\"font-size: 1.05em; line-height: 1.8; margin-bottom: 15px; margin-top: 0; color: #3a3a3a;\">No FAQs provided</p>";
   }
 
-  let html = '<h2 style="font-size: 1.8em; font-weight: 600; margin-top: 45px; margin-bottom: 25px; line-height: 1.3; color: #4d4f2f; border-bottom: 3px solid #e8e8e8; padding-bottom: 12px;">Frequently Asked Questions</h2>\n';
-  html += '<div style="margin: 20px 0;">\n';
+  let html = '<h2 style="font-size: 1.8em; font-weight: 600; margin-top: 50px; margin-bottom: 28px; line-height: 1.3; color: #424423; border-bottom: 3px solid #e8e8e8; padding-bottom: 12px;">Frequently Asked Questions</h2>\n';
+  html += '<div style="margin: 25px 0;">\n';
 
   for (const faq of faqs) {
     html += `
-<details style="margin-bottom: 15px; border: 1px solid #d0d0d0; border-radius: 6px; overflow: hidden;">
-  <summary style="padding: 18px 20px; background-color: #f9f9f9; cursor: pointer; font-weight: 600; font-size: 1.05em; color: #4d4f2f; user-select: none; display: flex; align-items: center; transition: background-color 0.2s ease;">
+<details style="margin-bottom: 18px; border: 1px solid #d0d0d0; border-radius: 6px; overflow: hidden;">
+  <summary style="padding: 20px 22px; background-color: #f9f9f9; cursor: pointer; font-weight: 600; font-size: 1.05em; color: #424423; user-select: none; display: flex; align-items: center; transition: background-color 0.2s ease;">
     ${textWithLinksToHTML(faq.question)}
   </summary>
-  <div style="padding: 18px 20px; border-top: 1px solid #e0e0e0; background-color: #ffffff; color: #3a3a3a; font-size: 1em; line-height: 1.8;">
+  <div style="padding: 20px 22px; border-top: 1px solid #e0e0e0; background-color: #ffffff; color: #3a3a3a; font-size: 1em; line-height: 1.8;">
     ${textWithLinksToHTML(faq.answer)}
   </div>
 </details>
