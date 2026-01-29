@@ -23,9 +23,22 @@ export interface PublishShopifyRequest {
 
 export const handlePublishShopify: RequestHandler = async (req, res) => {
   try {
+    console.log("=== POST /api/publish-shopify request received ===");
+    console.log("Request body keys:", Object.keys(req.body).join(", "));
+
     const { document, title, author, tags, publicationDate, imageUrls, featuredImageUrl, relatedProducts } = req.body as PublishShopifyRequest;
 
+    console.log("Publish parameters:");
+    console.log("  - Title:", title);
+    console.log("  - Document length:", document?.length);
+    console.log("  - Author:", author || "Not provided");
+    console.log("  - Tags:", tags?.length || 0);
+    console.log("  - Featured image URL:", featuredImageUrl ? "Present" : "Not provided");
+    console.log("  - Image URLs count:", Object.keys(imageUrls || {}).length);
+    console.log("  - Related products:", relatedProducts?.length || 0);
+
     if (!document || !title) {
+      console.error("Missing required fields");
       return res.status(400).json({
         error: "Missing required fields: 'document' and 'title'",
       });
