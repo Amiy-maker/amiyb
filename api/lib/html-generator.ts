@@ -282,30 +282,68 @@ function generateComparisonTable(lines: string[]): string {
 
 /**
  * Generate FAQ section with schema markup
+ * Handles flexible formatting with various spacing patterns
  */
 function generateFAQSection(lines: string[]): string {
   const faqs: Array<{ question: string; answer: string }> = [];
 
+  // First, try the standard format with Q: and A: prefixes
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (line.startsWith("Q:") || line.startsWith("Q ")) {
-      const question = line.replace(/^Q:?\s*/, "").trim();
-      let answer = "";
+    // Match Q: or Q followed by question text (handles Q1:, Q 1:, Q:, etc.)
+    if (line.match(/^Q\d*:?\s+/i)) {
+      const question = line.replace(/^Q\d*:?\s+/i, "").trim();
+      if (!question) continue;
 
-      // Collect answer lines
+      let answer = "";
       let j = i + 1;
-      while (j < lines.length && !lines[j].startsWith("Q:") && !lines[j].startsWith("Q ")) {
-        if (lines[j].startsWith("A:") || lines[j].startsWith("A ")) {
-          answer = lines[j].replace(/^A:?\s*/, "").trim();
-        } else if (answer) {
-          answer += " " + lines[j];
+
+      // Look for the answer - could be on next line, or skip some lines
+      while (j < lines.length) {
+        const nextLine = lines[j];
+
+        // Stop if we hit the next question
+        if (nextLine.match(/^Q\d*:?\s+/i)) {
+          break;
         }
+
+        // Found answer line
+        if (nextLine.match(/^A\d*:?\s+/i)) {
+          answer = nextLine.replace(/^A\d*:?\s+/i, "").trim();
+          break;
+        }
+
+        // Keep looking if it's just a non-Q/A line
         j++;
       }
 
       if (question && answer) {
         faqs.push({ question, answer });
       }
+    }
+  }
+
+  // If standard format didn't work, try pattern matching on the raw content
+  // by joining lines and looking for Q/A patterns
+  if (faqs.length === 0) {
+    const fullText = lines.join(" ");
+
+    // Match pattern: Q...?: ...text... A...?: ...text... (multiple times)
+    const qPattern = /Q\d*:?\s*([^QA]+?)(?=A\d*:?\s*)/gi;
+    const aPattern = /A\d*:?\s*([^QA]+?)(?=Q\d*:?\s*|$)/gi;
+
+    let qMatch;
+    let aMatches = [...fullText.matchAll(aPattern)];
+    let qIndex = 0;
+
+    while ((qMatch = qPattern.exec(fullText)) !== null) {
+      const question = qMatch[1].trim();
+      const answer = aMatches[qIndex] ? aMatches[qIndex][1].trim() : "";
+
+      if (question && answer) {
+        faqs.push({ question, answer });
+      }
+      qIndex++;
     }
   }
 
@@ -318,10 +356,10 @@ function generateFAQSection(lines: string[]): string {
 
   for (const faq of faqs) {
     html += `
-<details>
-  <summary>${escapeHTML(faq.question)}</summary>
-  <p>${escapeHTML(faq.answer)}</p>
-</details>
+<div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9;">
+  <p style="margin: 0 0 10px 0; font-weight: bold;"><strong>Q: ${escapeHTML(faq.question)}</strong></p>
+  <p style="margin: 0; color: #555;">A: ${escapeHTML(faq.answer)}</p>
+</div>
 `;
   }
 
