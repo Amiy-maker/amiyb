@@ -257,12 +257,12 @@ function generateComparisonTable(lines: string[]): string {
   const headers = lines[0].split("|").map((h) => h.trim());
   const rows = lines.slice(1).map((line) => line.split("|").map((cell) => cell.trim()));
 
-  let html = '<table>\n';
+  let html = '<table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 1em; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border-radius: 6px; overflow: hidden;">\n';
 
   // Header row
-  html += "<thead><tr>";
+  html += '<thead style="background: linear-gradient(135deg, #f5f5f5 0%, #ebebeb 100%);"><tr>';
   for (const header of headers) {
-    html += `<th>${escapeHTML(header)}</th>`;
+    html += `<th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #1a1a1a; border-bottom: 2px solid #d0d0d0; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.5px;">${textWithLinksToHTML(header)}</th>`;
   }
   html += "</tr></thead>\n";
 
@@ -271,7 +271,7 @@ function generateComparisonTable(lines: string[]): string {
   for (const row of rows) {
     html += "<tr>";
     for (const cell of row) {
-      html += `<td>${escapeHTML(cell)}</td>`;
+      html += `<td style="padding: 12px 15px; border-bottom: 1px solid #e8e8e8; color: #3a3a3a;">${textWithLinksToHTML(cell)}</td>`;
     }
     html += "</tr>";
   }
