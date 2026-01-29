@@ -40,7 +40,14 @@ export const handleGetProducts: RequestHandler = async (req, res) => {
     }
 
     console.log("Attempting to fetch products from Shopify...");
-    const products = await shopifyClient.getProducts(limit);
+    let products = await shopifyClient.getProducts(limit);
+
+    // Ensure products is always an array
+    if (!Array.isArray(products)) {
+      console.warn("getProducts did not return an array, converting to array. Value:", products);
+      products = [];
+    }
+
     console.log(`Successfully fetched ${products.length} products`);
     console.log("Products type:", Array.isArray(products) ? "array" : typeof products);
     if (Array.isArray(products) && products.length > 0) {
@@ -49,8 +56,8 @@ export const handleGetProducts: RequestHandler = async (req, res) => {
 
     const response = {
       success: true,
-      products,
-      count: products.length,
+      products: Array.isArray(products) ? products : [],
+      count: (Array.isArray(products) ? products : []).length,
     };
     console.log("Sending response:", JSON.stringify(response).substring(0, 500));
     res.json(response);
