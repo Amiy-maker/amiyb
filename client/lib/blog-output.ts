@@ -42,8 +42,8 @@ const BLOG_CSS = `
     font-size: 2rem;
     font-weight: 700;
     line-height: 1.3;
-    margin-top: 45px;
-    margin-bottom: 20px;
+    margin-top: 50px;
+    margin-bottom: 24px;
     color: #1a1a1a;
     border-bottom: 3px solid #2563eb;
     padding-bottom: 12px;
@@ -53,8 +53,8 @@ const BLOG_CSS = `
     font-size: 1.5rem;
     font-weight: 700;
     line-height: 1.4;
-    margin-top: 30px;
-    margin-bottom: 15px;
+    margin-top: 35px;
+    margin-bottom: 18px;
     color: #2563eb;
   }
 
