@@ -6,6 +6,14 @@ import { GenerateHTMLRequest, GenerateHTMLResponse } from "@shared/api";
 import { toast } from "sonner";
 import { Copy, Download, Zap, Upload, Edit2, Trash2 } from "lucide-react";
 import * as mammoth from "mammoth";
+import { RelatedProductsField } from "@/components/blog/RelatedProductsField";
+
+interface Product {
+  id: string;
+  title: string;
+  handle: string;
+  image?: string;
+}
 
 export default function BlogGenerator() {
   const [documentContent, setDocumentContent] = useState("");
