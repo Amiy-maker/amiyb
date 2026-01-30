@@ -8,6 +8,11 @@ const asyncHandler = (fn: RequestHandler): RequestHandler => (req, res, next) =>
 
 const getProductsHandler: RequestHandler = async (req, res) => {
   try {
+    // Disable caching for this endpoint to ensure fresh products are always returned
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+
     console.log("GET /api/products request received");
     const limit = parseInt(req.query.limit as string) || 250;
     console.log(`Fetching products with limit: ${limit}`);
