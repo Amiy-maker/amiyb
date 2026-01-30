@@ -53,23 +53,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Ensure products is always an array
     if (!Array.isArray(products)) {
-      console.warn("getProducts did not return an array, converting to array. Value:", products);
+      console.warn("⚠️  getProducts did not return an array, converting to array. Value:", products);
       products = [];
     }
 
-    console.log(`Successfully fetched ${products.length} products`);
-    console.log("Products type:", Array.isArray(products) ? "array" : typeof products);
+    console.log(`✓ Successfully fetched ${products.length} products from Shopify`);
     if (Array.isArray(products) && products.length > 0) {
-      console.log("First product:", products[0]);
+      console.log("First product structure:", JSON.stringify(products[0]));
+    }
+
+    // Validate product structure
+    const validProducts = products.filter(p => p && typeof p === 'object' && p.id && p.title && p.handle);
+    if (validProducts.length < products.length) {
+      console.warn(`⚠️  Filtered out ${products.length - validProducts.length} invalid products`);
     }
 
     const response = {
       success: true,
-      products: Array.isArray(products) ? products : [],
-      count: (Array.isArray(products) ? products : []).length,
+      products: validProducts,
     };
-    console.log("Sending response:", JSON.stringify(response).substring(0, 500));
-    res.json(response);
+
+    console.log(`Sending response: ${validProducts.length} products, success=true, HTTP 200`);
+    res.status(200).json(response);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Error fetching products:", errorMessage);
