@@ -483,6 +483,9 @@ export class ShopifyClient {
         const response = await fetch(restUrl, {
           headers: {
             "X-Shopify-Access-Token": this.accessToken,
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
           },
           signal: controller.signal,
         });
