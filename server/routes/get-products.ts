@@ -65,6 +65,7 @@ const getProductsHandler: RequestHandler = async (req, res) => {
       count: (Array.isArray(products) ? products : []).length,
     };
     console.log("Sending response:", JSON.stringify(response).substring(0, 500));
+    res.setHeader("Content-Type", "application/json");
     res.json(response);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
