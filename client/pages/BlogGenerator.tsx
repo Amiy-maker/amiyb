@@ -690,26 +690,38 @@ Timestamp: ${data.timestamp}
 
     setIsPublishing(true);
     try {
-      console.log("Starting publish process...");
+      console.log("=== Starting Shopify Publish Process ===");
       console.log("Title:", publishData.title);
       console.log("Featured image URL:", featuredImage?.url || "None");
       console.log("Document content length:", documentContent.length);
+      console.log("Related products count:", relatedProducts.length);
+      if (relatedProducts.length > 0) {
+        console.log("Related products details:", relatedProducts.map((p) => ({
+          id: p.id,
+          title: p.title,
+          handle: p.handle,
+        })));
+      }
+
+      const publishPayload = {
+        document: documentContent,
+        title: publishData.title,
+        author: publishData.author || undefined,
+        tags: publishData.tags
+          ? publishData.tags.split(",").map((t) => t.trim())
+          : undefined,
+        publicationDate: publishData.publicationDate,
+        imageUrls: Object.keys(imageUrls).length > 0 ? imageUrls : undefined,
+        featuredImageUrl: featuredImage?.url,
+        relatedProducts: relatedProducts.length > 0 ? relatedProducts : undefined,
+      };
+
+      console.log("Full publish payload:", publishPayload);
 
       const response = await fetch("/api/publish-shopify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          document: documentContent,
-          title: publishData.title,
-          author: publishData.author || undefined,
-          tags: publishData.tags
-            ? publishData.tags.split(",").map((t) => t.trim())
-            : undefined,
-          publicationDate: publishData.publicationDate,
-          imageUrls: Object.keys(imageUrls).length > 0 ? imageUrls : undefined,
-          featuredImageUrl: featuredImage?.url,
-          relatedProducts: relatedProducts.length > 0 ? relatedProducts : undefined,
-        }),
+        body: JSON.stringify(publishPayload),
       });
 
       console.log("Publish response status:", response.status);
