@@ -105,43 +105,62 @@ export function RelatedProductsField({
             }
 
             const data = await response.json();
-            console.log("Raw response data:", data);
-            console.log("Response data type:", typeof data);
-            console.log("Response data is array:", Array.isArray(data));
-            console.log("Response data keys:", Object.keys(data || {}).join(", "));
+            console.log("Products API response received:", {
+              success: data.success,
+              productsCount: Array.isArray(data.products) ? data.products.length : 0,
+              hasError: !!data.error,
+              errorCode: data.code,
+            });
 
+            // Check if API returned an error in the response body (but with 200 status)
+            if (!data.success && data.code) {
+              console.error("✗ API returned error in response body:", {
+                code: data.code,
+                error: data.error,
+                details: data.details,
+              });
+              lastError = new Error(data.error || "Failed to fetch products");
+
+              // Retry on timeout errors
+              if (data.code === "SHOPIFY_TIMEOUT" && attempt < maxRetries) {
+                console.log(`Shopify timeout detected (${data.code}), retrying...`);
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+                continue;
+              }
+
+              throw lastError;
+            }
+
+            // Handle successful response with products
             if (data.success && Array.isArray(data.products)) {
-              console.log(`✓ Successfully loaded ${data.products.length} products (success format)`);
-              setProducts(data.products);
-              if (data.products.length === 0) {
+              console.log(`✓ Successfully loaded ${data.products.length} products from API`);
+
+              // Validate product structure
+              const validProducts = data.products.filter((p: any) =>
+                p && typeof p === 'object' && p.id && p.title && p.handle
+              );
+
+              if (validProducts.length < data.products.length) {
+                console.warn(`⚠️  Filtered out ${data.products.length - validProducts.length} invalid products`);
+              }
+
+              setProducts(validProducts);
+              if (validProducts.length === 0) {
                 toast.info("No products found in your Shopify store");
               }
             } else if (Array.isArray(data)) {
-              console.log(`✓ Successfully loaded ${data.length} products (plain array format)`);
+              // Fallback: plain array response (for compatibility)
+              console.log(`✓ Successfully loaded ${data.length} products (array format)`);
               setProducts(data);
-            } else if (!data.success && (data.code || data.error)) {
-              // Handle error responses - user will see these via the error toast above
-              const errorMessage = data.error || "Failed to fetch products";
-              console.error("✗ API returned error:", data);
-              throw new Error(errorMessage);
-            } else if (data && typeof data === "object" && "products" in data && Array.isArray(data.products)) {
-              // Fallback: handle case where response has products array but success is missing/undefined
-              console.log(`✓ Successfully loaded ${data.products.length} products (fallback format)`);
-              setProducts(data.products);
             } else {
-              // Detailed error info for debugging
-              const debugInfo = {
-                dataExists: !!data,
-                dataType: typeof data,
-                isArray: Array.isArray(data),
-                isSuccessTrue: data?.success === true,
-                hasProducts: "products" in (data || {}),
+              // Unexpected response structure
+              console.error("✗ Unexpected response format:", {
+                success: data.success,
+                hasProducts: "products" in data,
                 isProductsArray: Array.isArray(data?.products),
                 keys: Object.keys(data || {}),
-                stringified: JSON.stringify(data).substring(0, 200)
-              };
-              console.error("✗ Unexpected response format:", debugInfo);
-              throw new Error(`Invalid products data: ${debugInfo.dataType}, Keys: ${debugInfo.keys.join(", ")}`);
+              });
+              throw new Error("Server returned unexpected response format");
             }
 
             // Success - break out of retry loop
