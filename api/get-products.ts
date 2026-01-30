@@ -4,9 +4,10 @@ import { getShopifyClient } from './lib/shopify-client.js';
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Disable caching for this endpoint to ensure fresh products are always returned
-    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Cache-Control", "no-store, max-age=0, must-revalidate");
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
+    res.removeHeader("ETag");
 
     console.log("GET /api/products request received");
     const limit = parseInt(req.query.limit as string) || 250;
