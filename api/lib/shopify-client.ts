@@ -546,7 +546,7 @@ export class ShopifyClient {
     namespace: string,
     key: string,
     value: string,
-    valueType: "string" | "json" = "json"
+    valueType: "string" | "json" | "list.product_reference" = "json"
   ): Promise<boolean> {
     this.validateCredentials();
 
