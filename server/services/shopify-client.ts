@@ -590,6 +590,13 @@ export class ShopifyClient {
   ): Promise<boolean> {
     this.validateCredentials();
 
+    console.log("=== Updating Article Metafield ===");
+    console.log(`Blog ID: ${blogId}`);
+    console.log(`Article ID: ${articleId}`);
+    console.log(`Namespace: ${namespace}, Key: ${key}`);
+    console.log(`Value Type: ${valueType}`);
+    console.log(`Value (first 200 chars): ${value.substring(0, 200)}`);
+
     const graphqlQuery = `
       mutation updateMetafield($input: MetafieldsSetInput!) {
         metafieldsSet(input: $input) {
@@ -598,6 +605,7 @@ export class ShopifyClient {
             namespace
             key
             value
+            type
           }
           userErrors {
             field
@@ -608,6 +616,7 @@ export class ShopifyClient {
     `;
 
     const articleGid = `gid://shopify/Article/${articleId.split('/').pop()}`;
+    console.log(`Article GID: ${articleGid}`);
 
     const variables = {
       input: {
@@ -623,17 +632,35 @@ export class ShopifyClient {
       },
     };
 
+    console.log("GraphQL Variables:", JSON.stringify(variables, null, 2));
+
     const response = await this.graphql(graphqlQuery, variables);
 
+    console.log("Metafield Response:", JSON.stringify(response, null, 2));
+
     if (response.errors) {
-      console.error("Update metafield error:", response.errors);
+      console.error("Update metafield GraphQL error:", response.errors);
       throw new Error(`Failed to update metafield: ${response.errors.map((e: any) => e.message).join('; ')}`);
     }
 
     const metafieldData = response.data?.metafieldsSet;
+    if (!metafieldData) {
+      console.error("No metafieldsSet data in response:", response.data);
+      throw new Error("Metafield update returned no data");
+    }
+
     if (metafieldData?.userErrors?.length > 0) {
       console.error("Metafield user errors:", metafieldData.userErrors);
-      throw new Error(`Metafield error: ${metafieldData.userErrors.map((e: any) => e.message).join('; ')}`);
+      const errorMessages = metafieldData.userErrors.map((e: any) => `${e.field}: ${e.message}`).join('; ');
+      throw new Error(`Metafield validation error: ${errorMessages}`);
+    }
+
+    console.log("✓ Metafield updated successfully");
+    if (metafieldData.metafields && metafieldData.metafields.length > 0) {
+      const updatedField = metafieldData.metafields[0];
+      console.log(`  - ID: ${updatedField.id}`);
+      console.log(`  - Type: ${updatedField.type}`);
+      console.log(`  - Value (first 100 chars): ${updatedField.value.substring(0, 100)}`);
     }
 
     return true;
