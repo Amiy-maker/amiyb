@@ -493,6 +493,12 @@ export class ShopifyClient {
         console.log(`Shopify response status: ${response.status} ${response.statusText}`);
         console.log(`Response headers content-type: ${response.headers.get("content-type")}`);
 
+        // Handle 304 Not Modified - return empty array since we can't read the body
+        if (response.status === 304) {
+          console.warn("Shopify returned 304 Not Modified - returning empty products array");
+          return [];
+        }
+
         if (!response.ok) {
           const errorText = await response.text();
           console.error(`Shopify API error (${response.status}):`, errorText.substring(0, 500));
