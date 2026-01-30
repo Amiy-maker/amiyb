@@ -12,6 +12,7 @@ const getProductsHandler: RequestHandler = async (req, res) => {
     res.setHeader("Cache-Control", "no-store, max-age=0, must-revalidate");
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
+    res.removeHeader("ETag");
 
     console.log("GET /api/products request received");
     const limit = parseInt(req.query.limit as string) || 250;
