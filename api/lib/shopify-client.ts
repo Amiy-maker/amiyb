@@ -450,6 +450,9 @@ export class ShopifyClient {
         const response = await fetch(restUrl, {
           headers: {
             "X-Shopify-Access-Token": this.accessToken,
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
           },
           signal: controller.signal,
         });
@@ -459,6 +462,12 @@ export class ShopifyClient {
         // Log response metadata
         console.log(`Shopify response status: ${response.status} ${response.statusText}`);
         console.log(`Response headers content-type: ${response.headers.get("content-type")}`);
+
+        // Handle 304 Not Modified - return empty array since we can't read the body
+        if (response.status === 304) {
+          console.warn("Shopify returned 304 Not Modified - returning empty products array");
+          return [];
+        }
 
         if (!response.ok) {
           const errorText = await response.text();

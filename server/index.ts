@@ -58,5 +58,20 @@ export function createServer() {
   // Image upload route
   app.post("/api/upload-image", upload.single("file"), handleUploadImage);
 
+  // Error handling middleware - must be last
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error("Unhandled error:", err);
+
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal server error";
+
+    res.status(status).json({
+      success: false,
+      error: message,
+      details: process.env.NODE_ENV === "production" ? undefined : err.stack,
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  });
+
   return app;
 }

@@ -1,7 +1,12 @@
 import { RequestHandler } from "express";
 import { getShopifyClient } from "../services/shopify-client.js";
 
-export const handleGetProducts: RequestHandler = async (req, res) => {
+// Wrapper to catch async errors and pass to error handler
+const asyncHandler = (fn: RequestHandler): RequestHandler => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+const getProductsHandler: RequestHandler = async (req, res) => {
   try {
     console.log("GET /api/products request received");
     const limit = parseInt(req.query.limit as string) || 250;
@@ -12,6 +17,7 @@ export const handleGetProducts: RequestHandler = async (req, res) => {
       shopifyClient = getShopifyClient();
     } catch (clientError) {
       console.error("Failed to initialize Shopify client:", clientError instanceof Error ? clientError.message : String(clientError));
+      res.setHeader("Content-Type", "application/json");
       return res.status(503).json({
         success: false,
         error: "Shopify not configured",
@@ -60,6 +66,7 @@ export const handleGetProducts: RequestHandler = async (req, res) => {
       count: (Array.isArray(products) ? products : []).length,
     };
     console.log("Sending response:", JSON.stringify(response).substring(0, 500));
+    res.setHeader("Content-Type", "application/json");
     res.json(response);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -106,6 +113,7 @@ export const handleGetProducts: RequestHandler = async (req, res) => {
       userMessage = "Shopify store could not be found. Check your shop name.";
     }
 
+    res.setHeader("Content-Type", "application/json");
     res.status(status).json({
       success: false,
       error: userMessage,
@@ -114,3 +122,5 @@ export const handleGetProducts: RequestHandler = async (req, res) => {
     });
   }
 };
+
+export const handleGetProducts = asyncHandler(getProductsHandler);
