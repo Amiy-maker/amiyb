@@ -12,12 +12,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const limit = parseInt(req.query.limit as string) || 250;
     console.log(`Fetching products with limit: ${limit}`);
 
+    // Always set content type and caching headers at the start
+    res.setHeader("Content-Type", "application/json");
+
     let shopifyClient;
     try {
       shopifyClient = getShopifyClient();
     } catch (clientError) {
       console.error("Failed to initialize Shopify client:", clientError instanceof Error ? clientError.message : String(clientError));
-      res.setHeader("Content-Type", "application/json");
       return res.status(503).json({
         success: false,
         error: "Shopify not configured",
