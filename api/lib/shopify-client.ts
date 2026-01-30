@@ -463,9 +463,18 @@ export class ShopifyClient {
         console.log(`Shopify response status: ${response.status} ${response.statusText}`);
         console.log(`Response headers content-type: ${response.headers.get("content-type")}`);
 
-        // Handle 304 Not Modified - return empty array since we can't read the body
+        // Handle 304 Not Modified - may indicate caching issue or invalid token
         if (response.status === 304) {
-          console.warn("Shopify returned 304 Not Modified - returning empty products array");
+          console.warn("Shopify returned 304 Not Modified");
+          const contentType = response.headers.get("content-type");
+          console.warn(`304 Response content-type: ${contentType}`);
+
+          // If we get 304 with non-JSON content, it's likely an auth issue
+          if (contentType && !contentType.includes("application/json")) {
+            throw new Error("Received 304 Not Modified with invalid content type. This may indicate an authentication issue with Shopify API.");
+          }
+
+          // For valid 304, return empty array (client has latest data from cache)
           return [];
         }
 
@@ -474,9 +483,11 @@ export class ShopifyClient {
           console.error(`Shopify API error (${response.status}):`, errorText.substring(0, 500));
 
           if (response.status === 401) {
-            throw new Error("Shopify authentication failed. Please check your access token.");
+            throw new Error("Shopify authentication failed. Invalid or expired access token. Please regenerate your token in Shopify admin.");
           } else if (response.status === 404) {
-            throw new Error("Shopify store not found. Please verify your shop name.");
+            throw new Error("Shopify store not found. Please verify SHOPIFY_SHOP is in format: myshop.myshopify.com");
+          } else if (response.status === 403) {
+            throw new Error("Shopify API access denied. Check your access token permissions.");
           } else {
             throw new Error(`Failed to fetch products from Shopify: ${response.status} ${response.statusText}`);
           }

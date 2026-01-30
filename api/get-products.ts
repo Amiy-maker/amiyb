@@ -9,18 +9,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader("Expires", "0");
     res.removeHeader("ETag");
 
-    console.log("GET /api/products request received");
-    const limit = parseInt(req.query.limit as string) || 250;
-    console.log(`Fetching products with limit: ${limit}`);
-
     // Always set content type and caching headers at the start
     res.setHeader("Content-Type", "application/json");
+
+    console.log("GET /api/products request received");
+
+    // Debug: Log environment variables (without exposing the full token)
+    const shopNameEnv = process.env.SHOPIFY_SHOP;
+    const accessTokenEnv = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+    const apiVersionEnv = process.env.SHOPIFY_API_VERSION;
+
+    console.log(`[DEBUG] Environment variables check:`);
+    console.log(`[DEBUG] SHOPIFY_SHOP: ${shopNameEnv ? '✓ set' : '✗ NOT SET'}`);
+    console.log(`[DEBUG] SHOPIFY_ADMIN_ACCESS_TOKEN: ${accessTokenEnv ? '✓ set' : '✗ NOT SET'}`);
+    console.log(`[DEBUG] SHOPIFY_API_VERSION: ${apiVersionEnv || 'using default'}`);
+
+    const limit = parseInt(req.query.limit as string) || 250;
+    console.log(`Fetching products with limit: ${limit}`);
 
     let shopifyClient;
     try {
       shopifyClient = getShopifyClient();
+      console.log("✓ Shopify client initialized successfully");
     } catch (clientError) {
-      console.error("Failed to initialize Shopify client:", clientError instanceof Error ? clientError.message : String(clientError));
+      const errorMsg = clientError instanceof Error ? clientError.message : String(clientError);
+      console.error("❌ Failed to initialize Shopify client:", errorMsg);
       return res.status(503).json({
         success: false,
         error: "Shopify not configured",
@@ -49,7 +62,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     console.log("Attempting to fetch products from Shopify...");
-    let products = await shopifyClient.getProducts(limit);
+    let products;
+    try {
+      products = await shopifyClient.getProducts(limit);
+    } catch (productsError) {
+      const errorMsg = productsError instanceof Error ? productsError.message : String(productsError);
+      console.error("❌ Error fetching products from Shopify:", errorMsg);
+      throw productsError;
+    }
 
     // Ensure products is always an array
     if (!Array.isArray(products)) {
