@@ -791,9 +791,9 @@ Timestamp: ${data.timestamp}
           toast.success(successMessage);
         } else {
           // Article was published, but metafield update failed
-          // Show as warning, not error, since the article itself was published successfully
+          // Show as info/warning since article itself was published successfully
           console.warn("Article published, but related products metafield update encountered an issue. Check server logs for details.");
-          toast.warning(`Article published successfully. However, related products metafield update had an issue. The article content is live but related products may not be saved.`);
+          toast.info(`Article published successfully. However, related products metafield update had an issue. The article is live but related products may not be saved. Check console for details.`);
         }
       } else {
         toast.success(successMessage);
