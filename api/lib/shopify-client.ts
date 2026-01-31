@@ -571,53 +571,59 @@ export class ShopifyClient {
   ): Promise<boolean> {
     this.validateCredentials();
 
-    const graphqlQuery = `
-      mutation updateMetafield($input: MetafieldsSetInput!) {
-        metafieldsSet(input: $input) {
-          metafields {
-            id
-            namespace
-            key
-            value
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `;
+    // Extract numeric article ID
+    const numericArticleId = String(articleId).includes('/')
+      ? String(articleId).split('/').pop()
+      : articleId;
 
-    const articleGid = `gid://shopify/Article/${articleId.split('/').pop()}`;
+    console.log("=== Updating Article Metafield via REST API ===");
+    console.log(`Blog ID: ${blogId}`);
+    console.log(`Article ID: ${numericArticleId}`);
+    console.log(`Namespace: ${namespace}, Key: ${key}`);
+    console.log(`Value Type: ${valueType}`);
 
-    const variables = {
-      input: {
-        ownerId: articleGid,
-        metafields: [
-          {
-            namespace,
-            key,
-            value,
-            type: valueType,
-          },
-        ],
+    const restUrl = `${this.baseUrl}/blogs/${blogId}/articles/${numericArticleId}/metafields.json`;
+    console.log(`REST URL: ${restUrl}`);
+
+    const payload = {
+      metafield: {
+        namespace,
+        key,
+        value,
+        type: valueType,
       },
     };
 
-    const response = await this.graphql(graphqlQuery, variables);
+    console.log("Metafield payload:", JSON.stringify(payload, null, 2));
 
-    if (response.errors) {
-      console.error("Update metafield error:", response.errors);
-      throw new Error(`Failed to update metafield: ${response.errors.map((e: any) => e.message).join('; ')}`);
+    try {
+      const response = await fetch(restUrl, {
+        method: "POST",
+        headers: {
+          "X-Shopify-Access-Token": this.accessToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log(`Metafield update response status: ${response.status}`);
+
+      const responseData = await response.json();
+      console.log("Metafield response:", JSON.stringify(responseData, null, 2));
+
+      if (!response.ok) {
+        const errorMsg = responseData?.errors || responseData?.error || response.statusText;
+        console.error(`Metafield update failed (${response.status}):`, errorMsg);
+        throw new Error(`Failed to update metafield: ${JSON.stringify(errorMsg)}`);
+      }
+
+      console.log("✅ Metafield updated successfully via REST API");
+      return true;
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error("Error updating metafield:", errorMsg);
+      throw error;
     }
-
-    const metafieldData = response.data?.metafieldsSet;
-    if (metafieldData?.userErrors?.length > 0) {
-      console.error("Metafield user errors:", metafieldData.userErrors);
-      throw new Error(`Metafield error: ${metafieldData.userErrors.map((e: any) => e.message).join('; ')}`);
-    }
-
-    return true;
   }
 
   /**
