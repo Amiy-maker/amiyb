@@ -238,7 +238,7 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
         console.log(`  - Namespace: custom`);
         console.log(`  - Key: related_products`);
         console.log(`  - Type: list.product_reference`);
-        console.log(`  - Products: ${productIds.length}`);
+        console.log(`  - Products: ${productGids.length}`);
       } catch (error) {
         const metafieldErrorMsg = error instanceof Error ? error.message : String(error);
         console.error("✗ Error saving related products to metafield:", metafieldErrorMsg);
