@@ -223,8 +223,9 @@ function generateSectionBody(
         result += `<p style="font-size: 1.05em; line-height: 1.8; margin-bottom: 20px; margin-top: 0; color: #3a3a3a;">${textWithLinksToHTML(bodyText)}</p>`;
       }
 
-      // Add image if enabled and available
-      if (includeImages && idx % 2 === 1 && imageIndex < sectionImages.length) {
+      // Add images sequentially as they become available
+      // Insert images after paragraphs in order (not just every other one)
+      if (includeImages && imageIndex < sectionImages.length) {
         const image = sectionImages[imageIndex];
         console.log(`Looking for image keyword: "${image.keyword}" in section`);
         const imageUrl = imageUrls[image.keyword];
@@ -233,10 +234,12 @@ function generateSectionBody(
         if (imageUrl) {
           console.log(`Resolved image URL for section: ${imageUrl}`);
           result += `\n<img src="${imageUrl}" alt="${image.keyword}" style="width: 100%; max-width: 850px; height: auto; display: block; margin: 30px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); object-fit: contain; background-color: #f5f5f5;" />`;
+          imageIndex++;
         } else {
-          console.log(`Image URL not available for keyword: ${image.keyword}`);
+          console.log(`Image URL not available for keyword: ${image.keyword}. Image will be skipped.`);
+          // Still increment index to try next image on next paragraph
+          imageIndex++;
         }
-        imageIndex++;
       }
 
       return result;
