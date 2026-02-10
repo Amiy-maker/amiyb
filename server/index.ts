@@ -1,7 +1,20 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import path from "path";
 import express from "express";
 import cors from "cors";
 import multer from "multer";
+
+// Load environment variables from .env file
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const envPath = path.resolve(__dirname, "../.env");
+const result = dotenv.config({ path: envPath });
+
+console.log("Dotenv loading:", {
+  path: envPath,
+  parsed: result.parsed ? Object.keys(result.parsed) : [],
+  error: result.error?.message
+});
 import { handleDemo } from "./routes/demo.js";
 import { handleParseDocument } from "./routes/parse-document.js";
 import { handleGenerateHTML } from "./routes/generate-html.js";

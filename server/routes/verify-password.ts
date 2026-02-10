@@ -8,12 +8,13 @@ export const handleVerifyPassword: RequestHandler = (req, res) => {
     return;
   }
 
-  const correctPassword = process.env.APP_PASSWORD;
+  const correctPassword = process.env.APP_PASSWORD || "AmiySEO";
 
   console.log("Password verification attempt:", {
     provided: password,
     expected: correctPassword,
     match: password === correctPassword,
+    envAppPassword: process.env.APP_PASSWORD,
     env: Object.keys(process.env).filter(k => k.startsWith('APP') || k.startsWith('SHOPIFY'))
   });
 

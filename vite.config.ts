@@ -41,6 +41,10 @@ function expressPlugin(): Plugin {
             try {
               const { createServer } = await import("./server/index.js");
               expressApp = createServer();
+              console.log("Express server initialized with env vars:", {
+                hasAppPassword: !!process.env.APP_PASSWORD,
+                appPassword: process.env.APP_PASSWORD
+              });
             } catch (error) {
               console.error("Failed to load Express server:", error);
               res.statusCode = 500;
