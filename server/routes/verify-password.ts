@@ -10,6 +10,13 @@ export const handleVerifyPassword: RequestHandler = (req, res) => {
 
   const correctPassword = process.env.APP_PASSWORD;
 
+  console.log("Password verification attempt:", {
+    provided: password,
+    expected: correctPassword,
+    match: password === correctPassword,
+    env: Object.keys(process.env).filter(k => k.startsWith('APP') || k.startsWith('SHOPIFY'))
+  });
+
   if (password === correctPassword) {
     res.json({ success: true });
   } else {
