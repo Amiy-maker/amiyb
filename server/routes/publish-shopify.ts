@@ -221,7 +221,7 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
         "custom",
         "content_html",
         bodyHtml, // Save the full generated HTML
-        "string"
+        "multi_line_text_field" // Use multi_line_text_field type instead of string
       );
       contentHtmlMetafieldSuccess = true;
       console.log("✓ Full HTML metafield saved successfully");
