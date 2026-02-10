@@ -96,9 +96,8 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
     }
 
     // Generate styled HTML for Shopify
-    // Important: DO NOT include featured image in body HTML - it will be set as the article image field
-    // This ensures the featured image appears in Shopify's "Image" field, not in the content
     let bodyHtml: string;
+    let description: string = "";
     try {
       console.log("Generating styled HTML...");
       bodyHtml = generateStyledHTML(parsed, {
@@ -117,6 +116,17 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
           error: "HTML generation failed",
           details: "The generated HTML is empty. Please check your document content.",
         });
+      }
+
+      // Extract description from section2 (Intro Paragraph)
+      const section2 = parsed.sections.find((s) => s.id === "section2");
+      if (section2) {
+        // Use the raw content but clean it up (remove markdown/special chars)
+        description = section2.rawContent
+          .replace(/\{img\}\s*([^\n\r{}]+)/gi, "") // Remove image markers
+          .trim()
+          .substring(0, 500); // Limit to 500 chars for Shopify content field
+        console.log("Extracted description from section2:", description.substring(0, 100) + "...");
       }
 
       console.log("HTML generated successfully. Size:", bodyHtml.length, "characters");
@@ -180,13 +190,14 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
     console.log("Article tags:", tags?.length || 0);
     console.log("Article author:", author || "Blog Generator (default)");
     console.log("Body HTML size:", bodyHtml.length, "bytes");
+    console.log("Description for content field:", description.substring(0, 50) + "...");
 
     let articleId: string;
     try {
       console.log("Sending article to Shopify REST API...");
       articleId = await shopifyClient.publishArticle(blogId, {
         title,
-        bodyHtml,
+        bodyHtml: description || bodyHtml, // Use description as main content, fallback to full HTML
         author: author || "Blog Generator",
         publishedAt: publicationDate || new Date().toISOString(),
         tags: tags || [],
@@ -198,6 +209,47 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
       console.error("✗ Article publication failed:", publishErrorMsg);
       console.error("Error details:", publishError);
       throw publishError;
+    }
+
+    // Save full HTML to metafield custom.content_html
+    let contentHtmlMetafieldSuccess = false;
+    try {
+      console.log("✓ Saving full HTML to metafield custom.content_html");
+      await shopifyClient.updateArticleMetafield(
+        blogId,
+        articleId,
+        "custom",
+        "content_html",
+        bodyHtml, // Save the full generated HTML
+        "string"
+      );
+      contentHtmlMetafieldSuccess = true;
+      console.log("✓ Full HTML metafield saved successfully");
+    } catch (error) {
+      const metafieldErrorMsg = error instanceof Error ? error.message : String(error);
+      console.error("✗ Error saving HTML to content_html metafield:", metafieldErrorMsg);
+      console.log("Note: Article is already published. Metafield update is optional.");
+    }
+
+    // Optionally save description as a content metafield for reference
+    let contentMetafieldSuccess = false;
+    if (description) {
+      try {
+        console.log("✓ Saving description to metafield custom.content");
+        await shopifyClient.updateArticleMetafield(
+          blogId,
+          articleId,
+          "custom",
+          "content",
+          description,
+          "string"
+        );
+        contentMetafieldSuccess = true;
+        console.log("✓ Content metafield saved successfully");
+      } catch (error) {
+        const metafieldErrorMsg = error instanceof Error ? error.message : String(error);
+        console.error("✗ Error saving description to content metafield:", metafieldErrorMsg);
+      }
     }
 
     // Save related products to metafield if provided
@@ -259,6 +311,8 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
       articleId,
       metadata: parsed.metadata,
       featuredImageIncluded: !!featuredImageUrl,
+      contentHtmlMetafieldSuccess,
+      contentMetafieldSuccess,
       relatedProductsCount: relatedProducts?.length || 0,
       relatedProductsMetafieldSuccess: relatedProductsMetafieldSuccess,
     });
