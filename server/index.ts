@@ -1,7 +1,37 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import path from "path";
 import express from "express";
 import cors from "cors";
 import multer from "multer";
+
+// Load environment variables from .env file
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const envPath = path.resolve(__dirname, "../.env");
+const result = dotenv.config({ path: envPath });
+
+console.log("Dotenv loading:", {
+  path: envPath,
+  parsed: result.parsed ? Object.keys(result.parsed) : [],
+  error: result.error?.message,
+});
+
+// Ensure all parsed variables are available in process.env
+if (result.parsed) {
+  for (const [key, value] of Object.entries(result.parsed)) {
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+}
+
+console.log("Environment variables available:", {
+  SHOPIFY_SHOP: process.env.SHOPIFY_SHOP || "NOT SET",
+  SHOPIFY_ADMIN_ACCESS_TOKEN: process.env.SHOPIFY_ADMIN_ACCESS_TOKEN ? "***set***" : "NOT SET",
+  SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || "NOT SET",
+  BLOG_ID: process.env.BLOG_ID || "NOT SET",
+  APP_PASSWORD: process.env.APP_PASSWORD ? "***set***" : "NOT SET",
+});
 import { handleDemo } from "./routes/demo.js";
 import { handleParseDocument } from "./routes/parse-document.js";
 import { handleGenerateHTML } from "./routes/generate-html.js";
@@ -57,6 +87,17 @@ export function createServer() {
 
   // Image upload route
   app.post("/api/upload-image", upload.single("file"), handleUploadImage);
+
+  // Debug endpoint to check environment variables
+  app.get("/api/env-check", (_req, res) => {
+    res.json({
+      SHOPIFY_SHOP: process.env.SHOPIFY_SHOP || "NOT SET",
+      SHOPIFY_ADMIN_ACCESS_TOKEN: process.env.SHOPIFY_ADMIN_ACCESS_TOKEN ? "***SET***" : "NOT SET",
+      SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || "NOT SET",
+      BLOG_ID: process.env.BLOG_ID || "NOT SET",
+      APP_PASSWORD: process.env.APP_PASSWORD ? "***SET***" : "NOT SET",
+    });
+  });
 
   // Error handling middleware - must be last
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

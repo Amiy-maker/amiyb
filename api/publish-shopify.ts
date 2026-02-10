@@ -104,6 +104,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       featuredImageUrl: undefined,
     });
     console.log(`[${new Date().toISOString()}] HTML generated. Size: ${bodyHtml.length} characters`);
+
+    // Extract description from section2 (Intro Paragraph)
+    let description: string = "";
+    const section2 = parsed.sections.find((s) => s.id === "section2");
+    if (section2) {
+      // Use the raw content but clean it up (remove markdown/special chars)
+      description = section2.rawContent
+        .replace(/\{img\}\s*([^\n\r{}]+)/gi, "") // Remove image markers
+        .trim()
+        .substring(0, 500); // Limit to 500 chars for Shopify content field
+      console.log(`[${new Date().toISOString()}] Extracted description from section2: ${description.substring(0, 100)}...`);
+    }
+
     console.log(`[${new Date().toISOString()}] Publishing with featured image URL:`, featuredImageUrl);
 
     // Publish to Shopify
@@ -128,16 +141,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Publish article with featured image as the article image field (not in body HTML)
     console.log(`[${new Date().toISOString()}] Publishing article to Shopify...`);
     console.log(`[${new Date().toISOString()}] Featured image URL for publication: ${featuredImageUrl ? 'present' : 'missing'}`);
+    console.log(`[${new Date().toISOString()}] Description for content field: ${description.substring(0, 50)}...`);
 
     const articleId = await shopifyClient.publishArticle(blogId, {
       title,
-      bodyHtml,
+      bodyHtml: description || bodyHtml, // Use description as main content, fallback to full HTML
       author: author || "Blog Generator",
       publishedAt: publicationDate || new Date().toISOString(),
       tags: tags || [],
       image: featuredImageUrl ? { src: featuredImageUrl } : undefined,
     });
     console.log(`[${new Date().toISOString()}] Article published successfully. Article ID: ${articleId}`);
+
+    // Save full HTML to metafield custom.content_html
+    let contentHtmlMetafieldSuccess = false;
+    try {
+      console.log(`[${new Date().toISOString()}] ✓ Saving full HTML to metafield custom.content_html`);
+      await shopifyClient.updateArticleMetafield(
+        blogId,
+        articleId,
+        "custom",
+        "content_html",
+        bodyHtml, // Save the full generated HTML
+        "multi_line_text_field" // Use multi_line_text_field type
+      );
+      contentHtmlMetafieldSuccess = true;
+      console.log(`[${new Date().toISOString()}] ✓ Full HTML metafield saved successfully`);
+    } catch (error) {
+      const metafieldErrorMsg = error instanceof Error ? error.message : String(error);
+      console.error(`[${new Date().toISOString()}] ✗ Error saving HTML to content_html metafield:`, metafieldErrorMsg);
+      console.log(`[${new Date().toISOString()}] Note: Article is already published. Metafield update is optional.`);
+    }
+
+    // Optionally save description as a content metafield for reference
+    let contentMetafieldSuccess = false;
+    if (description) {
+      try {
+        console.log(`[${new Date().toISOString()}] ✓ Saving description to metafield custom.content`);
+        await shopifyClient.updateArticleMetafield(
+          blogId,
+          articleId,
+          "custom",
+          "content",
+          description,
+          "string"
+        );
+        contentMetafieldSuccess = true;
+        console.log(`[${new Date().toISOString()}] ✓ Content metafield saved successfully`);
+      } catch (error) {
+        const metafieldErrorMsg = error instanceof Error ? error.message : String(error);
+        console.error(`[${new Date().toISOString()}] ✗ Error saving description to content metafield:`, metafieldErrorMsg);
+      }
+    }
 
     // Save related products to metafield if provided
     if (relatedProducts && relatedProducts.length > 0) {
@@ -186,6 +241,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       articleId,
       metadata: parsed.metadata,
       featuredImageIncluded: !!featuredImageUrl,
+      contentHtmlMetafieldSuccess,
+      contentMetafieldSuccess,
       relatedProductsCount: relatedProducts?.length || 0,
     });
   } catch (error) {
