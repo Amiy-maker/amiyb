@@ -53,7 +53,7 @@ export function generateHTML(
     console.log("Adding featured image to HTML:", featuredImageUrl);
     // Use inline styles for maximum Shopify compatibility
     // Featured image is styled with consistent aspect ratio and shadow
-    const featuredImageHtml = `<img src="${featuredImageUrl}" alt="Featured image" style="width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin: 0 0 40px 0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); display: block;" />`;
+    const featuredImageHtml = `<img src="${featuredImageUrl}" alt="Featured image" style="width: 100%; max-width: 900px; height: auto; aspect-ratio: 16 / 9; object-fit: contain; margin: 0 auto 40px auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); display: block; background-color: #f5f5f5;" />`;
     sections.push(featuredImageHtml);
   } else {
     console.log("Featured image not included. includeImages:", includeImages, "featuredImageUrl:", featuredImageUrl);
@@ -348,18 +348,22 @@ function generateFAQSection(lines: string[]): string {
   }
 
   if (faqs.length === 0) {
-    return "<p>No FAQs provided</p>";
+    return "<p style=\"font-size: 1.05em; line-height: 1.8; margin-bottom: 15px; margin-top: 0; color: #3a3a3a;\">No FAQs provided</p>";
   }
 
-  let html = '<h2>Frequently Asked Questions</h2>\n';
-  html += '<div>\n';
+  let html = '<h2 style="font-size: 1.8em; font-weight: 600; margin-top: 50px; margin-bottom: 28px; line-height: 1.3; color: #1a1a1a; border-bottom: 3px solid #e8e8e8; padding-bottom: 12px;">Frequently Asked Questions</h2>\n';
+  html += '<div style="margin: 25px 0;">\n';
 
   for (const faq of faqs) {
     html += `
-<div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9;">
-  <p style="margin: 0 0 10px 0; font-weight: bold;"><strong>Q: ${escapeHTML(faq.question)}</strong></p>
-  <p style="margin: 0; color: #555;">A: ${escapeHTML(faq.answer)}</p>
-</div>
+<details style="margin-bottom: 18px; border: 1px solid #d0d0d0; border-radius: 6px; overflow: hidden;">
+  <summary style="padding: 20px 22px; background-color: #f9f9f9; cursor: pointer; font-weight: 600; font-size: 1.05em; color: #1a1a1a; user-select: none; display: flex; align-items: center; transition: background-color 0.2s ease;">
+    ${textWithLinksToHTML(faq.question)}
+  </summary>
+  <div style="padding: 20px 22px; border-top: 1px solid #e0e0e0; background-color: #ffffff; color: #3a3a3a; font-size: 1em; line-height: 1.8;">
+    ${textWithLinksToHTML(faq.answer)}
+  </div>
+</details>
 `;
   }
 
@@ -477,8 +481,8 @@ function isValidURL(url: string): boolean {
 }
 
 /**
- * Generate HTML with inline styles (for Shopify/external publishing)
- * Wraps content in a div with core styles for Shopify compatibility
+ * Generate HTML with embedded styles (for Shopify/external publishing)
+ * Uses inline styles and a style tag for maximum compatibility with Shopify
  */
 export function generateStyledHTML(
   parsed: ParsedDocument,
@@ -487,9 +491,47 @@ export function generateStyledHTML(
   const content = generateHTML(parsed, options);
 
   // Shopify and other platforms strip <style> tags for security
-  // All styling uses inline styles on individual elements
-  // Wrapper div includes core typography and layout styles
-  return `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; line-height: 1.7; color: #2c3e50; max-width: 720px; margin: 0 auto; padding: 20px 0;">\n${content}\n</div>`;
+  // We include both: inline styles for individual elements AND a style tag as fallback
+  // The style tag will be stripped by Shopify, but inline styles will remain
+  const styleTag = `<style>
+    .blog-content {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      line-height: 1.7;
+      color: #2c3e50;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    .blog-content * { margin: 0; padding: 0; box-sizing: border-box; }
+    .blog-content h1 { font-size: 2.5em; font-weight: 700; margin-bottom: 30px; margin-top: 0; line-height: 1.2; color: #1a1a1a; letter-spacing: -0.5px; }
+    .blog-content h2 { font-size: 1.8em; font-weight: 600; margin-top: 50px; margin-bottom: 28px; line-height: 1.3; color: #1a1a1a; border-bottom: 3px solid #e8e8e8; padding-bottom: 12px; }
+    .blog-content p { font-size: 1.05em; line-height: 1.8; margin-bottom: 20px; color: #3a3a3a; }
+    .blog-content ul, .blog-content ol { margin: 20px 0 20px 35px; line-height: 1.9; }
+    .blog-content li { margin-bottom: 12px; font-size: 1.05em; color: #3a3a3a; }
+    .blog-content blockquote { border-left: 5px solid #d4a574; padding: 25px 30px; margin: 40px 0; background-color: #fef9f5; font-style: italic; font-size: 1.15em; color: #5a5a5a; line-height: 1.8; }
+    .blog-content table { width: 100%; border-collapse: collapse; margin: 40px 0; font-size: 1em; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border-radius: 6px; overflow: hidden; }
+    .blog-content thead { background: linear-gradient(135deg, #f5f5f5 0%, #ebebeb 100%); }
+    .blog-content th { padding: 15px 18px; text-align: left; font-weight: 600; color: #1a1a1a; border-bottom: 2px solid #d0d0d0; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.5px; }
+    .blog-content td { padding: 15px 18px; border-bottom: 1px solid #e8e8e8; color: #3a3a3a; }
+    .blog-content tbody tr:hover { background-color: #f9f9f9; }
+    .blog-content img { max-width: 100%; height: auto; display: block; margin: 40px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+    .blog-content details { margin: 18px 0; padding: 0; border: 1px solid #d0d0d0; border-radius: 6px; background-color: transparent; cursor: pointer; transition: all 0.3s ease; overflow: hidden; }
+    .blog-content details:hover { background-color: #f5f5f5; }
+    .blog-content details[open] { background-color: #f5f5f5; }
+    .blog-content summary { font-weight: 600; font-size: 1.05em; color: #1a1a1a; cursor: pointer; outline: none; user-select: none; padding: 20px 22px; background-color: #f9f9f9; display: flex; align-items: center; transition: background-color 0.2s ease; }
+    .blog-content details > div { padding: 20px 22px; border-top: 1px solid #e0e0e0; background-color: #ffffff; color: #3a3a3a; font-size: 1em; line-height: 1.8; }
+    .blog-content a { color: #2563eb; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    @media (max-width: 768px) {
+      .blog-content h1 { font-size: 2em; margin-bottom: 24px; }
+      .blog-content h2 { font-size: 1.5em; margin-top: 40px; margin-bottom: 20px; }
+      .blog-content p { font-size: 1em; }
+      .blog-content ul, .blog-content ol { margin-left: 24px; }
+    }
+  </style>`;
+
+  const wrapperStyle = `font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; line-height: 1.7; color: #2c3e50; max-width: 720px; margin: 0 auto; padding: 40px 20px; background-color: #ffffff;`;
+
+  return `${styleTag}<div class="blog-content" style="${wrapperStyle}">\n${content}\n</div>`;
 }
 
 /**
