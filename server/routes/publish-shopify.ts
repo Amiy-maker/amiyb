@@ -197,7 +197,7 @@ export const handlePublishShopify: RequestHandler = async (req, res) => {
       console.log("Sending article to Shopify REST API...");
       articleId = await shopifyClient.publishArticle(blogId, {
         title,
-        bodyHtml: description || bodyHtml, // Use description as main content, fallback to full HTML
+        bodyHtml: bodyHtml, // Use full generated HTML for article content
         author: author || "Blog Generator",
         publishedAt: publicationDate || new Date().toISOString(),
         tags: tags || [],
