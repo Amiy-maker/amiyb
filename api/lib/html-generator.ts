@@ -296,9 +296,11 @@ function generateFAQSection(lines: string[]): string {
       if (!question) continue;
 
       let answer = "";
+      let answerLines: string[] = [];
       let j = i + 1;
+      let foundExplicitAnswer = false;
 
-      // Look for the answer - could be on next line, or skip some lines
+      // Look for the answer - could be on next line(s), or skip some lines
       while (j < lines.length) {
         const nextLine = lines[j];
 
@@ -307,14 +309,28 @@ function generateFAQSection(lines: string[]): string {
           break;
         }
 
-        // Found answer line
+        // Found answer line with explicit A: marker
         if (nextLine.match(/^A\d*:?\s+/i)) {
           answer = nextLine.replace(/^A\d*:?\s+/i, "").trim();
+          foundExplicitAnswer = true;
           break;
         }
 
-        // Keep looking if it's just a non-Q/A line
+        // Collect answer continuation lines if we haven't found explicit A: yet
+        if (!foundExplicitAnswer && j === i + 1) {
+          // Start collecting answer from line after Q
+          answerLines.push(nextLine);
+        } else if (!foundExplicitAnswer && answerLines.length > 0) {
+          // Continue collecting lines until next Q
+          answerLines.push(nextLine);
+        }
+
         j++;
+      }
+
+      // If we didn't find explicit A: marker, use collected lines
+      if (!foundExplicitAnswer && answerLines.length > 0) {
+        answer = answerLines.join(" ").trim();
       }
 
       if (question && answer) {
@@ -329,8 +345,9 @@ function generateFAQSection(lines: string[]): string {
     const fullText = lines.join(" ");
 
     // Match pattern: Q...?: ...text... A...?: ...text... (multiple times)
-    const qPattern = /Q\d*:?\s*([^QA]+?)(?=A\d*:?\s*)/gi;
-    const aPattern = /A\d*:?\s*([^QA]+?)(?=Q\d*:?\s*|$)/gi;
+    // Use [\s\S]*? to match any character (including those containing Q or A) instead of [^QA]+?
+    const qPattern = /Q\d*:?\s*([\s\S]*?)(?=A\d*:?\s*)/gi;
+    const aPattern = /A\d*:?\s*([\s\S]*?)(?=Q\d*:?\s*|$)/gi;
 
     let qMatch;
     let aMatches = [...fullText.matchAll(aPattern)];

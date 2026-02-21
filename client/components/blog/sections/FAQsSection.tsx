@@ -53,12 +53,12 @@ export function FAQsSection({ post, onUpdateSection }: FAQsSectionProps) {
             FAQ Items <span className="text-red-500">*</span>
           </Label>
           <span className="text-sm text-gray-600">
-            {post.sections.faqs.items.length} / 6 items
+            {post.sections.faqs.items.length} / 12 items
           </span>
         </div>
 
         <p className="text-sm text-gray-600 mb-4">
-          Add 4-6 frequently asked questions and their answers. This section is
+          Add 4-12 frequently asked questions and their answers. This section is
           schema-friendly for search engine visibility.
         </p>
 
@@ -119,7 +119,7 @@ export function FAQsSection({ post, onUpdateSection }: FAQsSectionProps) {
         </div>
 
         <div className="flex gap-2 mt-4">
-          {post.sections.faqs.items.length < 6 && (
+          {post.sections.faqs.items.length < 12 && (
             <Button
               onClick={handleAddFAQ}
               variant="outline"

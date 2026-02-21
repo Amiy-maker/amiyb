@@ -145,7 +145,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const articleId = await shopifyClient.publishArticle(blogId, {
       title,
-      bodyHtml: description || bodyHtml, // Use description as main content, fallback to full HTML
+      bodyHtml: "", // Keep article body empty - content goes only to metafield
       author: author || "Blog Generator",
       publishedAt: publicationDate || new Date().toISOString(),
       tags: tags || [],

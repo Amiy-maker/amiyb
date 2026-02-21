@@ -109,8 +109,8 @@ export function validateBlogPost(post: BlogPost): ValidationState {
     errors.push(
       `FAQs section requires at least 4 complete Q&A pairs (currently ${validFAQs.length})`
     );
-  } else if (validFAQs.length > 6) {
-    warnings.push(`FAQs section should have 4-6 items (currently ${validFAQs.length})`);
+  } else if (validFAQs.length > 12) {
+    warnings.push(`FAQs section should have 4-12 items (currently ${validFAQs.length})`);
   } else {
     completedSections.push("FAQs");
   }
